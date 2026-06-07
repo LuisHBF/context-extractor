@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.contextextractor.presentation.steps.AgentStepController"
+            styleClass="step-pane">
+
+    <center>
+        <ScrollPane fitToWidth="true" styleClass="step-scroll">
+            <VBox styleClass="step-content" spacing="24">
+
+                <VBox spacing="6">
+                    <Label text="Select Agent File" styleClass="step-section-title"/>
+                    <Label text="Choose a .md or .agent file that will guide the AI's behavior."
+                           styleClass="step-description" wrapText="true"/>
+                </VBox>
+
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <TextField fx:id="filePathField"
+                               promptText="No file selected"
+                               editable="false"
+                               HBox.hgrow="ALWAYS"/>
+                    <Button text="Browse…" styleClass="browse-button" onAction="#onBrowse"/>
+                </HBox>
+
+                <VBox spacing="8">
+                    <Label text="Preview" styleClass="step-label-text"/>
+                    <TextArea fx:id="previewArea"
+                              editable="false"
+                              wrapText="true"
+                              prefRowCount="10"
+                              styleClass="preview-area"/>
+                </VBox>
+
+            </VBox>
+        </ScrollPane>
+    </center>
+
+    <bottom>
+        <HBox styleClass="step-nav-bar" alignment="CENTER_LEFT" spacing="12">
+            <Button fx:id="backButton" text="← Back" styleClass="back-button" onAction="#onBack"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button fx:id="nextButton" text="Next →" styleClass="next-button" onAction="#onNext"/>
+        </HBox>
+    </bottom>
+
+</BorderPane>

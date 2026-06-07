@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import com.contextextractor.presentation.components.TagListEditor?>
+<?import javafx.scene.control.Alert?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.contextextractor.presentation.settings.SettingsController"
+            styleClass="step-pane">
+
+    <center>
+        <ScrollPane styleClass="step-scroll" fitToWidth="true">
+            <VBox styleClass="step-content" spacing="32">
+
+                <Label text="Settings" styleClass="step-section-title"/>
+
+                <!-- Export section -->
+                <VBox spacing="10">
+                    <Label text="EXPORT" styleClass="step-label-text"/>
+                    <Label text="Maximum XML File Size" styleClass="step-description"/>
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <Spinner fx:id="maxSizeSpinner" editable="true" prefWidth="90"/>
+                        <Label text="MB"/>
+                    </HBox>
+                    <Label text="If the generated XML exceeds this size, it will be split into multiple files."
+                           styleClass="step-description" wrapText="true"/>
+                </VBox>
+
+                <!-- File Exclusions section -->
+                <VBox spacing="10">
+                    <Label text="FILE EXCLUSIONS" styleClass="step-label-text"/>
+                    <Label text="Files and directories matching these patterns will be ignored during scanning."
+                           styleClass="step-description" wrapText="true"/>
+                    <TagListEditor fx:id="tagListEditor"/>
+                </VBox>
+
+                <!-- Output directory -->
+                <VBox spacing="8">
+                    <Label text="OUTPUT DIRECTORY" styleClass="step-label-text"/>
+                    <Label text="Where generated XML files are saved." styleClass="step-description"/>
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <TextField fx:id="outputDirField" HBox.hgrow="ALWAYS"/>
+                        <Button text="Browse…" styleClass="browse-button" onAction="#onBrowseOutputDir"/>
+                    </HBox>
+                </VBox>
+
+                <!-- Presets directory -->
+                <VBox spacing="8">
+                    <Label text="PRESETS DIRECTORY" styleClass="step-label-text"/>
+                    <Label text="Where preset JSON files are saved and loaded from." styleClass="step-description"/>
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <TextField fx:id="presetsDirField" HBox.hgrow="ALWAYS"/>
+                        <Button text="Browse…" styleClass="browse-button" onAction="#onBrowsePresetsDir"/>
+                    </HBox>
+                </VBox>
+
+                <!-- Footer -->
+                <HBox spacing="12" alignment="CENTER_LEFT">
+                    <Button text="Save Settings" styleClass="next-button" onAction="#onSave"/>
+                    <Button text="Reset to Defaults" styleClass="destructive-button" onAction="#onResetToDefaults"/>
+                </HBox>
+
+            </VBox>
+        </ScrollPane>
+    </center>
+
+    <bottom>
+        <HBox styleClass="step-nav-bar" alignment="CENTER_LEFT">
+            <Button text="← Back to Steps" styleClass="back-button" onAction="#onBack"/>
+        </HBox>
+    </bottom>
+
+</BorderPane>

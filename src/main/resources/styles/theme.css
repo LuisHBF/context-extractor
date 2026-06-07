@@ -1,0 +1,478 @@
+/* Context Extractor — custom palette on top of AtlantaFX PrimerLight */
+
+.root {
+    -color-bg-default: #F5F7FA;
+    -color-bg-overlay: #FFFFFF;
+    -color-accent-fg: #5B6AF0;
+    -accent-color: #5B6AF0;
+    -color-accent-emphasis: #7C3AED;
+    -color-fg-default: #1E1E2E;
+    -color-fg-muted: #6B7280;
+    -color-success-fg: #10B981;
+    -color-danger-fg: #EF4444;
+}
+
+/* ── Root layout ─────────────────────────────────────────────────────────── */
+
+.root-pane {
+    -fx-background-color: -color-bg-default;
+}
+
+/* ── Header bar ──────────────────────────────────────────────────────────── */
+
+.header-bar {
+    -fx-background-color: -color-bg-overlay;
+    -fx-min-height: 56;
+    -fx-max-height: 56;
+    -fx-padding: 0 20 0 20;
+    -fx-border-color: #E5E7EB;
+    -fx-border-width: 0 0 1 0;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.05), 4, 0, 0, 1);
+}
+
+.header-title {
+    -fx-text-fill: -color-fg-default;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+/* ── Content area ────────────────────────────────────────────────────────── */
+
+.content-area {
+    -fx-background-color: -color-bg-default;
+}
+
+/* ── Header settings button ──────────────────────────────────────────────── */
+
+.settings-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: -color-fg-muted;
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
+    -fx-padding: 6 12 6 12;
+    -fx-border-color: transparent;
+}
+
+.settings-button:hover {
+    -fx-text-fill: -color-fg-default;
+    -fx-background-color: #F0F1FE;
+    -fx-background-radius: 6;
+}
+
+/* ── Sidebar about label ─────────────────────────────────────────────────── */
+
+.sidebar-about-label {
+    -fx-text-fill: #C4C9D4;
+    -fx-font-size: 11px;
+}
+
+.sidebar-about-label:hover {
+    -fx-text-fill: #9CA3AF;
+}
+
+/* ── Stepper sidebar ─────────────────────────────────────────────────────── */
+
+.stepper-sidebar {
+    -fx-background-color: -color-bg-overlay;
+    -fx-border-color: #E5E7EB;
+    -fx-border-width: 0 1 0 0;
+    -fx-min-width: 220;
+    -fx-max-width: 220;
+    -fx-pref-width: 220;
+}
+
+/* Step circle states */
+.step-circle-pending {
+    -fx-fill: transparent;
+    -fx-stroke: #6B7280;
+    -fx-stroke-width: 2;
+}
+
+.step-circle-active {
+    -fx-fill: #5B6AF0;
+    -fx-stroke: transparent;
+    -fx-stroke-width: 0;
+}
+
+.step-circle-completed {
+    -fx-fill: #10B981;
+    -fx-stroke: transparent;
+    -fx-stroke-width: 0;
+}
+
+/* Step number / checkmark label */
+.step-number {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.step-number-light {
+    -fx-text-fill: white;
+}
+
+.step-number-dark {
+    -fx-text-fill: #6B7280;
+}
+
+/* Step name label */
+.step-label {
+    -fx-font-size: 13px;
+}
+
+.step-label-active {
+    -fx-text-fill: #1E1E2E;
+    -fx-font-weight: bold;
+}
+
+.step-label-completed {
+    -fx-text-fill: #6B7280;
+}
+
+.step-label-pending {
+    -fx-text-fill: #6B7280;
+}
+
+/* Connector line between steps */
+.step-connector {
+    -fx-background-color: #E5E7EB;
+}
+
+/* Sidebar settings button */
+.sidebar-settings-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: -color-fg-muted;
+    -fx-font-size: 13px;
+    -fx-cursor: hand;
+    -fx-padding: 8 16 8 16;
+    -fx-border-color: transparent;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.sidebar-settings-button:hover {
+    -fx-text-fill: -color-fg-default;
+}
+
+/* ── Step content pane ───────────────────────────────────────────────────── */
+
+.step-pane {
+    -fx-background-color: -color-bg-default;
+}
+
+.step-title {
+    -fx-text-fill: -color-fg-default;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
+
+/* ── Navigation bar (bottom of each step) ───────────────────────────────── */
+
+.step-nav-bar {
+    -fx-padding: 16 24 24 24;
+    -fx-background-color: -color-bg-default;
+}
+
+.next-button {
+    -fx-background-color: #5B6AF0;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-padding: 8 20 8 20;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+    -fx-border-color: transparent;
+}
+
+.next-button:hover {
+    -fx-background-color: #7C3AED;
+}
+
+.back-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: -color-fg-muted;
+    -fx-font-size: 14px;
+    -fx-padding: 8 20 8 20;
+    -fx-cursor: hand;
+    -fx-border-color: transparent;
+}
+
+.back-button:hover {
+    -fx-text-fill: -color-fg-default;
+    -fx-background-color: #F0F0F0;
+    -fx-background-radius: 6;
+}
+
+/* ── Step content layout ─────────────────────────────────────────────────── */
+
+.step-scroll {
+    -fx-background-color: -color-bg-default;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+}
+
+.step-scroll > .viewport {
+    -fx-background-color: -color-bg-default;
+}
+
+.step-content {
+    -fx-padding: 40 48 40 48;
+    -fx-background-color: -color-bg-default;
+}
+
+.step-section-title {
+    -fx-text-fill: -color-fg-default;
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+}
+
+.step-description {
+    -fx-text-fill: -color-fg-muted;
+    -fx-font-size: 14px;
+}
+
+.step-label-text {
+    -fx-text-fill: -color-fg-muted;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-transform: uppercase;
+}
+
+.browse-button {
+    -fx-background-color: #EAECF8;
+    -fx-text-fill: #5B6AF0;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 8 16 8 16;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+    -fx-border-color: transparent;
+}
+
+.browse-button:hover {
+    -fx-background-color: #D6D9F5;
+}
+
+.preview-area {
+    -fx-control-inner-background: #FAFAFA;
+    -fx-font-family: "Consolas", "Courier New", monospace;
+    -fx-font-size: 12px;
+    -fx-text-fill: -color-fg-default;
+}
+
+.files-found-label {
+    -fx-text-fill: #10B981;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.files-skipped-label {
+    -fx-text-fill: -color-fg-muted;
+    -fx-font-size: 14px;
+}
+
+.warning-label {
+    -fx-text-fill: #EF4444;
+    -fx-font-size: 14px;
+}
+
+.next-button:disabled {
+    -fx-opacity: 0.4;
+}
+
+/* ── Database step ───────────────────────────────────────────────────────── */
+
+.connection-status-success {
+    -fx-text-fill: #10B981;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+.connection-status-error {
+    -fx-text-fill: #EF4444;
+    -fx-font-size: 13px;
+}
+
+.db-default-config {
+    -fx-background-color: #F5F7FA;
+    -fx-background-radius: 6;
+    -fx-border-color: #E5E7EB;
+    -fx-border-radius: 6;
+    -fx-border-width: 1;
+    -fx-padding: 12;
+}
+
+.db-table-row {
+    -fx-background-color: white;
+    -fx-border-color: #E5E7EB;
+    -fx-border-radius: 6;
+    -fx-border-width: 1;
+    -fx-background-radius: 6;
+}
+
+.db-table-header {
+    -fx-background-color: transparent;
+    -fx-background-radius: 6 6 0 0;
+}
+
+.db-table-header:hover {
+    -fx-background-color: #F5F7FA;
+}
+
+.db-expand-icon {
+    -fx-text-fill: -color-fg-muted;
+    -fx-font-size: 11px;
+}
+
+.db-table-name {
+    -fx-text-fill: -color-fg-default;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+.db-table-detail {
+    -fx-border-color: #E5E7EB;
+    -fx-border-width: 1 0 0 0;
+}
+
+/* ── Review step ─────────────────────────────────────────────────────────── */
+
+.review-card {
+    -fx-background-color: white;
+    -fx-border-color: #E5E7EB;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-border-width: 1;
+    -fx-padding: 16;
+}
+
+.generate-button {
+    -fx-background-color: #5B6AF0;
+    -fx-text-fill: white;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-padding: 10 28 10 28;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+    -fx-border-color: transparent;
+}
+
+.generate-button:hover {
+    -fx-background-color: #7C3AED;
+}
+
+.generate-button:disabled {
+    -fx-opacity: 0.5;
+}
+
+.result-panel-success {
+    -fx-background-color: #ECFDF5;
+    -fx-border-color: #10B981;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-border-width: 1;
+    -fx-padding: 16;
+}
+
+.result-title-success {
+    -fx-text-fill: #10B981;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.result-panel-error {
+    -fx-background-color: #FEF2F2;
+    -fx-border-color: #EF4444;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-border-width: 1;
+    -fx-padding: 16;
+}
+
+.result-title-error {
+    -fx-text-fill: #EF4444;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+/* ── Secondary / outlined button ─────────────────────────────────────────── */
+
+.secondary-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #5B6AF0;
+    -fx-font-size: 14px;
+    -fx-padding: 8 20 8 20;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+    -fx-border-color: #5B6AF0;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 6;
+}
+
+.secondary-button:hover {
+    -fx-background-color: #EEF0FF;
+}
+
+/* ── Destructive button ───────────────────────────────────────────────────── */
+
+.destructive-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #EF4444;
+    -fx-font-size: 14px;
+    -fx-padding: 8 20 8 20;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+    -fx-border-color: #EF4444;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 6;
+}
+
+.destructive-button:hover {
+    -fx-background-color: #FEF2F2;
+}
+
+/* ── Tag / chip component ─────────────────────────────────────────────────── */
+
+.tag-chip {
+    -fx-background-color: #EEF0FF;
+    -fx-background-radius: 12;
+}
+
+.tag-chip-label {
+    -fx-text-fill: #5B6AF0;
+    -fx-font-size: 12px;
+}
+
+.tag-chip-remove {
+    -fx-background-color: transparent;
+    -fx-text-fill: #5B6AF0;
+    -fx-font-size: 12px;
+    -fx-padding: 0 2 0 2;
+    -fx-cursor: hand;
+    -fx-border-color: transparent;
+    -fx-min-width: 16;
+    -fx-min-height: 16;
+}
+
+.tag-chip-remove:hover {
+    -fx-text-fill: #EF4444;
+}
+
+/* ── Form field focus ─────────────────────────────────────────────────────── */
+
+.text-field:focused,
+.password-field:focused,
+.text-area:focused,
+.combo-box:focused {
+    -fx-border-color: #5B6AF0;
+    -fx-effect: dropshadow(three-pass-box, rgba(91,106,240,0.15), 4, 0, 0, 0);
+}
+
+/* ── Progress bar color ──────────────────────────────────────────────────── */
+
+.progress-bar .bar {
+    -fx-background-color: #5B6AF0;
+    -fx-background-radius: 4;
+}
+
+.progress-bar .track {
+    -fx-background-color: #EEF0FF;
+    -fx-background-radius: 4;
+}

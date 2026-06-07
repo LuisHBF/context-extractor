@@ -1,0 +1,53 @@
+# Build output
+target/
+dependency-reduced-pom.xml
+
+# Compiled classes and binaries
+*.class
+*.jar
+*.exe
+*.war
+*.ear
+
+# Distribution artifacts (dist/ is tracked; only the fat JAR is committed)
+!dist/
+!dist/*.jar
+dist/*.zip
+
+# Maven wrapper (optional — remove if you add mvnw)
+.mvn/
+
+# IDE — IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# IDE — Eclipse
+.classpath
+.project
+.settings/
+bin/
+
+# IDE — VS Code
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Project-specific: Claude Code task/spec files
+CLAUDE.md
+TASK*.md
+
+# App runtime data (generated at runtime next to the JAR)
+presets/
+settings.json
+*.log
+
+# Misc
+*.orig
+*.bak
+*.swp
+*.tmp

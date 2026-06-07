@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.contextextractor.presentation.steps.DatabaseStepController"
+            styleClass="step-pane">
+
+    <center>
+        <ScrollPane styleClass="step-scroll" fitToWidth="true">
+            <VBox styleClass="step-content" spacing="32">
+
+                <!-- Connection section -->
+                <VBox spacing="16">
+                    <Label text="Database Connection" styleClass="step-section-title"/>
+                    <Label text="Connect to a PostgreSQL database to include schema definitions and sample data in the context."
+                           styleClass="step-description" wrapText="true"/>
+
+                    <HBox spacing="12">
+                        <VBox spacing="4" HBox.hgrow="ALWAYS">
+                            <Label text="HOST" styleClass="step-label-text"/>
+                            <TextField fx:id="hostField" promptText="localhost"/>
+                        </VBox>
+                        <VBox spacing="4">
+                            <Label text="PORT" styleClass="step-label-text"/>
+                            <TextField fx:id="portField" promptText="5432" prefWidth="100"/>
+                        </VBox>
+                    </HBox>
+
+                    <VBox spacing="4">
+                        <Label text="DATABASE" styleClass="step-label-text"/>
+                        <TextField fx:id="databaseField" promptText="my_database"/>
+                    </VBox>
+
+                    <HBox spacing="12">
+                        <VBox spacing="4" HBox.hgrow="ALWAYS">
+                            <Label text="USERNAME" styleClass="step-label-text"/>
+                            <TextField fx:id="usernameField" promptText="postgres"/>
+                        </VBox>
+                        <VBox spacing="4" HBox.hgrow="ALWAYS">
+                            <Label text="PASSWORD" styleClass="step-label-text"/>
+                            <PasswordField fx:id="passwordField"/>
+                        </VBox>
+                    </HBox>
+
+                    <HBox spacing="12" alignment="CENTER_LEFT">
+                        <Button fx:id="testConnectionButton" text="Test Connection"
+                                styleClass="browse-button" onAction="#onTestConnection"/>
+                        <ProgressIndicator fx:id="connectionProgress"
+                                          prefWidth="20" prefHeight="20"
+                                          visible="false" managed="false"/>
+                        <Label fx:id="connectionStatusLabel"/>
+                    </HBox>
+                </VBox>
+
+                <!-- Schema section -->
+                <VBox fx:id="schemaSection" spacing="8" visible="false" managed="false">
+                    <Label text="SCHEMA" styleClass="step-label-text"/>
+                    <ChoiceBox fx:id="schemaComboBox" onAction="#onSchemaSelected" prefWidth="300"/>
+                </VBox>
+
+                <!-- Tables section -->
+                <VBox fx:id="tablesSection" spacing="16" visible="false" managed="false">
+                    <HBox alignment="CENTER_LEFT" spacing="12">
+                        <Label text="Tables" styleClass="step-section-title"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Button text="Apply to All" styleClass="browse-button" onAction="#onApplyToAll"/>
+                    </HBox>
+
+                    <!-- Default config applied by "Apply to All" -->
+                    <VBox spacing="8" styleClass="db-default-config">
+                        <Label text="DEFAULT EXPORT CONFIG" styleClass="step-label-text"/>
+                        <HBox spacing="20" alignment="CENTER_LEFT">
+                            <CheckBox fx:id="defaultExportDdl" text="Export DDL" selected="true"/>
+                            <CheckBox fx:id="defaultExportData" text="Export Data" selected="true"/>
+                            <Label text="Row limit:" styleClass="step-label-text"/>
+                            <Spinner fx:id="defaultRowLimit" editable="true" prefWidth="90"/>
+                        </HBox>
+                    </VBox>
+
+                    <!-- Dynamically populated table rows -->
+                    <VBox fx:id="tableListContainer" spacing="4"/>
+                </VBox>
+
+            </VBox>
+        </ScrollPane>
+    </center>
+
+    <bottom>
+        <HBox styleClass="step-nav-bar" alignment="CENTER_LEFT" spacing="12">
+            <Button fx:id="backButton" text="← Back" styleClass="back-button" onAction="#onBack"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button fx:id="nextButton" text="Next →" styleClass="next-button" onAction="#onNext"/>
+        </HBox>
+    </bottom>
+
+</BorderPane>

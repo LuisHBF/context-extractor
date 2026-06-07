@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.contextextractor.presentation.steps.ReviewStepController"
+            styleClass="step-pane">
+
+    <center>
+        <ScrollPane styleClass="step-scroll" fitToWidth="true">
+            <VBox styleClass="step-content" spacing="24">
+
+                <Label text="Review &amp; Generate" styleClass="step-section-title"/>
+                <Label text="Check your selections, then generate the AI context file."
+                       styleClass="step-description" wrapText="true"/>
+
+                <!-- Review cards -->
+                <VBox styleClass="review-card" spacing="6">
+                    <Label text="AGENT" styleClass="step-label-text"/>
+                    <Label fx:id="agentReviewLabel" wrapText="true"/>
+                </VBox>
+
+                <VBox styleClass="review-card" spacing="6">
+                    <Label text="DIRECTORY" styleClass="step-label-text"/>
+                    <Label fx:id="directoryReviewLabel" wrapText="true"/>
+                </VBox>
+
+                <VBox styleClass="review-card" spacing="6">
+                    <Label text="DATABASE" styleClass="step-label-text"/>
+                    <Label fx:id="databaseReviewLabel" wrapText="true"/>
+                </VBox>
+
+                <VBox styleClass="review-card" spacing="6">
+                    <Label text="ADDITIONAL CONTEXT" styleClass="step-label-text"/>
+                    <Label fx:id="additionalContextReviewLabel" wrapText="true"/>
+                </VBox>
+
+                <VBox styleClass="review-card" spacing="6">
+                    <Label text="OUTPUT" styleClass="step-label-text"/>
+                    <Label fx:id="outputReviewLabel" wrapText="true"/>
+                </VBox>
+
+                <!-- Output file name -->
+                <VBox spacing="6">
+                    <Label text="OUTPUT FILE NAME" styleClass="step-label-text"/>
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <TextField fx:id="outputFileNameField" promptText="context" prefWidth="280"/>
+                        <Label text=".xml" styleClass="step-description"/>
+                    </HBox>
+                    <Label text="Leave blank to use 'context' as the default name."
+                           styleClass="step-description" wrapText="true"/>
+                </VBox>
+
+                <!-- Actions -->
+                <VBox spacing="16">
+                    <HBox spacing="12" alignment="CENTER_LEFT">
+                        <Button fx:id="generateButton" text="Generate AI Context"
+                                styleClass="generate-button" onAction="#onGenerate"/>
+                        <Button text="Save Preset" styleClass="browse-button"
+                                onAction="#onToggleSavePreset"/>
+                    </HBox>
+
+                    <!-- Save preset inline panel -->
+                    <HBox fx:id="savePresetPanel" spacing="8" alignment="CENTER_LEFT"
+                          visible="false" managed="false">
+                        <TextField fx:id="presetNameField" promptText="Preset name..." prefWidth="220"/>
+                        <Button text="Save" styleClass="browse-button" onAction="#onSavePreset"/>
+                        <Label fx:id="presetSaveStatusLabel" styleClass="connection-status-success"/>
+                    </HBox>
+
+                    <!-- Progress -->
+                    <VBox fx:id="progressSection" spacing="8" visible="false" managed="false">
+                        <ProgressBar fx:id="progressBar" prefWidth="440" progress="0"/>
+                        <Label fx:id="progressStatusLabel" styleClass="step-description"/>
+                    </VBox>
+
+                    <!-- Success result -->
+                    <VBox fx:id="resultPanel" spacing="10" styleClass="result-panel-success"
+                          visible="false" managed="false">
+                        <Label text="Generated successfully!" styleClass="result-title-success"/>
+                        <Label fx:id="resultFilesLabel" wrapText="true" styleClass="step-description"/>
+                        <Button text="Open Downloads Folder" styleClass="browse-button"
+                                onAction="#onOpenDownloads"/>
+                    </VBox>
+
+                    <!-- Error result -->
+                    <VBox fx:id="errorPanel" spacing="10" styleClass="result-panel-error"
+                          visible="false" managed="false">
+                        <Label text="Generation failed" styleClass="result-title-error"/>
+                        <Label fx:id="errorMessageLabel" wrapText="true" styleClass="step-description"/>
+                    </VBox>
+                </VBox>
+
+            </VBox>
+        </ScrollPane>
+    </center>
+
+    <bottom>
+        <HBox styleClass="step-nav-bar" alignment="CENTER_LEFT" spacing="12">
+            <Button fx:id="backButton" text="← Back" styleClass="back-button" onAction="#onBack"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <!-- nextButton is required by BaseStepController; hidden automatically on last step -->
+            <Button fx:id="nextButton" text="Next →" styleClass="next-button" onAction="#onNext"
+                    visible="false" managed="false"/>
+        </HBox>
+    </bottom>
+
+</BorderPane>
