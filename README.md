@@ -47,7 +47,6 @@ It requires **Java 21** to run:
 java -jar dist/context-extractor.jar
 ```
 
-A self-contained Windows app-image (bundled JRE, no Java installation required) is attached to the [latest GitHub Release](https://github.com/LuisHBF/content-extractor/releases/latest).
 
 ### Run from source
 
