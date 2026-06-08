@@ -4,7 +4,9 @@ import com.contextextractor.application.LoadPresetUseCase;
 import com.contextextractor.domain.model.AgentConfig;
 import com.contextextractor.domain.model.AppSettings;
 import com.contextextractor.domain.model.DatabaseConfig;
-import com.contextextractor.domain.model.DirectoryConfig;
+import com.contextextractor.domain.model.FileSource;
+import com.contextextractor.domain.model.FileSourceConfig;
+import com.contextextractor.domain.model.FileSourceType;
 import com.contextextractor.domain.model.Preset;
 import com.contextextractor.domain.model.ScannedFile;
 import com.contextextractor.domain.model.TableConfig;
@@ -27,7 +29,9 @@ import javafx.scene.layout.StackPane;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class MainController {
 
@@ -48,7 +52,7 @@ public class MainController {
     private final ObjectProperty<AppSettings> settings = new SimpleObjectProperty<>();
 
     private AgentConfig agentConfig;
-    private DirectoryConfig directoryConfig;
+    private FileSourceConfig fileSourceConfig;
     private DatabaseConfig databaseConfig;
     private List<TableConfig> tableConfigs;
     private String additionalContext = "";
@@ -146,7 +150,7 @@ public class MainController {
     }
 
     private void applyPreset(Preset preset) {
-        record PresetLoadResult(AgentConfig agentConfig, DirectoryConfig directoryConfig) {}
+        record PresetLoadResult(AgentConfig agentConfig, FileSourceConfig fileSourceConfig) {}
 
         Task<PresetLoadResult> task = new Task<>() {
             @Override
@@ -159,24 +163,37 @@ public class MainController {
                     }
                 }
 
-                DirectoryConfig dc = null;
-                if (preset.directoryPath() != null && !preset.directoryPath().isBlank()) {
-                    Path p = Path.of(preset.directoryPath());
-                    if (Files.isDirectory(p)) {
-                        AppSettings s = preset.settings() != null ? preset.settings() : settings.get();
-                        List<ScannedFile> files = new RecursiveFileScanner(s).scan(p);
-                        dc = new DirectoryConfig(p, files);
+                FileSourceConfig fsc = null;
+                if (preset.fileSources() != null && !preset.fileSources().isEmpty()) {
+                    AppSettings s = preset.settings() != null ? preset.settings() : settings.get();
+                    RecursiveFileScanner scanner = new RecursiveFileScanner(s);
+                    List<FileSource> sources = new ArrayList<>();
+                    for (Preset.PresetSource ps : preset.fileSources()) {
+                        try {
+                            FileSourceType type = FileSourceType.valueOf(ps.type());
+                            Path p = Path.of(ps.path()).toAbsolutePath().normalize();
+                            List<ScannedFile> files;
+                            if (type == FileSourceType.DIRECTORY && Files.isDirectory(p)) {
+                                files = scanner.scan(p);
+                            } else if (type == FileSourceType.FILE && Files.isRegularFile(p)) {
+                                files = scanner.scanSingle(p);
+                            } else {
+                                continue;
+                            }
+                            sources.add(new FileSource(type, p, files, Set.of()));
+                        } catch (Exception ignored) {}
                     }
+                    if (!sources.isEmpty()) fsc = new FileSourceConfig(sources);
                 }
 
-                return new PresetLoadResult(ac, dc);
+                return new PresetLoadResult(ac, fsc);
             }
         };
 
         task.setOnSucceeded(e -> {
             PresetLoadResult result = task.getValue();
             agentConfig = result.agentConfig();
-            directoryConfig = result.directoryConfig();
+            fileSourceConfig = result.fileSourceConfig();
             databaseConfig = preset.databaseConfig();
             tableConfigs = preset.tableConfigs();
             additionalContext = preset.additionalContext() != null ? preset.additionalContext() : "";
@@ -199,8 +216,8 @@ public class MainController {
     public void setAgentConfig(AgentConfig config) { agentConfig = config; }
     public AgentConfig getAgentConfig() { return agentConfig; }
 
-    public void setDirectoryConfig(DirectoryConfig config) { directoryConfig = config; }
-    public DirectoryConfig getDirectoryConfig() { return directoryConfig; }
+    public void setFileSourceConfig(FileSourceConfig config) { fileSourceConfig = config; }
+    public FileSourceConfig getFileSourceConfig() { return fileSourceConfig; }
 
     public void setDatabaseConfig(DatabaseConfig config) { databaseConfig = config; }
     public DatabaseConfig getDatabaseConfig() { return databaseConfig; }

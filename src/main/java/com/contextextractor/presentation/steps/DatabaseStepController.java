@@ -43,6 +43,8 @@ public class DatabaseStepController extends BaseStepController {
     @FXML private CheckBox defaultExportDdl;
     @FXML private CheckBox defaultExportData;
     @FXML private Spinner<Integer> defaultRowLimit;
+    @FXML private TextField tableSearchField;
+    @FXML private Label noTablesMatchLabel;
     @FXML private VBox tableListContainer;
 
     private final PostgresInspector inspector = new PostgresInspector();
@@ -51,19 +53,39 @@ public class DatabaseStepController extends BaseStepController {
 
     @FXML
     private void initialize() {
-        defaultRowLimit.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 100000, 100));
+        defaultRowLimit.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 100000, 5));
+        tableSearchField.textProperty().addListener((obs, old, val) -> applyTableFilter(val));
     }
 
     @Override
     public void onNavigatedTo(int stepIndex) {
         super.onNavigatedTo(stepIndex);
         DatabaseConfig existing = mainController.getDatabaseConfig();
-        if (existing != null) {
+        if (existing != null && !existing.host().isBlank()) {
             hostField.setText(existing.host());
             portField.setText(String.valueOf(existing.port()));
             databaseField.setText(existing.database());
             usernameField.setText(existing.username());
             passwordField.setText(existing.password());
+
+            if (!existing.schema().isBlank()) {
+                schemaComboBox.getItems().setAll(existing.schema());
+                schemaComboBox.setValue(existing.schema());
+                schemaSection.setVisible(true);
+                schemaSection.setManaged(true);
+
+                List<TableConfig> saved = mainController.getTableConfigs();
+                if (saved != null && !saved.isEmpty()) {
+                    for (TableConfig tc : saved) {
+                        TableRowView row = new TableRowView(tc);
+                        row.wireOnChange(this::saveToMain);
+                        tableRows.add(row);
+                        tableListContainer.getChildren().add(row.root());
+                    }
+                    tablesSection.setVisible(true);
+                    tablesSection.setManaged(true);
+                }
+            }
         }
     }
 
@@ -150,14 +172,17 @@ public class DatabaseStepController extends BaseStepController {
         bindProgress(task);
 
         task.setOnSucceeded(e -> {
+            tableSearchField.setText("");
             List<String> tables = task.getValue();
             for (String tableName : tables) {
                 TableRowView row = new TableRowView(tableName);
+                row.wireOnChange(this::saveToMain);
                 tableRows.add(row);
                 tableListContainer.getChildren().add(row.root());
             }
             tablesSection.setVisible(true);
             tablesSection.setManaged(true);
+            saveToMain();
         });
 
         task.setOnFailed(e -> {
@@ -181,26 +206,26 @@ public class DatabaseStepController extends BaseStepController {
             row.setExportData(data);
             row.setRowLimit(limit);
         }
+        saveToMain();
     }
 
     @Override
     protected void onNext() {
+        saveToMain();
+        mainController.nextStep();
+    }
+
+    private void saveToMain() {
         String host = hostField.getText().trim();
         String database = databaseField.getText().trim();
-
         if (!host.isEmpty() && !database.isEmpty()) {
             int port = parsePort();
-            String username = usernameField.getText().trim();
-            String password = passwordField.getText();
             String schema = schemaComboBox.getValue() != null ? schemaComboBox.getValue() : "";
-            DatabaseConfig config = new DatabaseConfig(host, port, database, username, password, schema);
+            DatabaseConfig config = new DatabaseConfig(host, port, database,
+                    usernameField.getText().trim(), passwordField.getText(), schema);
             mainController.setDatabaseConfig(config);
-
-            List<TableConfig> configs = tableRows.stream().map(TableRowView::toConfig).toList();
-            mainController.setTableConfigs(configs);
+            mainController.setTableConfigs(tableRows.stream().map(TableRowView::toConfig).toList());
         }
-
-        mainController.nextStep();
     }
 
     private int parsePort() {
@@ -227,6 +252,24 @@ public class DatabaseStepController extends BaseStepController {
         tablesSection.setManaged(false);
         tableListContainer.getChildren().clear();
         tableRows.clear();
+        tableSearchField.setText("");
+    }
+
+    private void applyTableFilter(String filter) {
+        String lower = filter == null ? "" : filter.strip().toLowerCase();
+        boolean anyVisible = false;
+        for (var node : tableListContainer.getChildren()) {
+            Object userData = node.getUserData();
+            String name = userData instanceof String s ? s.toLowerCase() : "";
+            boolean match = lower.isEmpty() || name.contains(lower);
+            node.setVisible(match);
+            node.setManaged(match);
+            if (match) anyVisible = true;
+        }
+        boolean showNoMatch = !lower.isEmpty() && !anyVisible;
+        noTablesMatchLabel.setText(showNoMatch ? "No tables match \"" + filter.strip() + "\"." : "");
+        noTablesMatchLabel.setVisible(showNoMatch);
+        noTablesMatchLabel.setManaged(showNoMatch);
     }
 
     private void cancelCurrentTask() {
@@ -271,9 +314,9 @@ public class DatabaseStepController extends BaseStepController {
             nameLabel.getStyleClass().add("db-table-name");
 
             ddlCheckBox = new CheckBox("DDL");
-            ddlCheckBox.setSelected(true);
+            ddlCheckBox.setSelected(false);
             dataCheckBox = new CheckBox("Data");
-            dataCheckBox.setSelected(true);
+            dataCheckBox.setSelected(false);
 
             Region spacer = new Region();
             HBox.setHgrow(spacer, Priority.ALWAYS);
@@ -290,7 +333,7 @@ public class DatabaseStepController extends BaseStepController {
             orderByField.setPromptText("ORDER BY clause (optional, e.g. created_at DESC)");
 
             rowLimitSpinner = new Spinner<>();
-            rowLimitSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 100000, 100));
+            rowLimitSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 100000, 5));
             rowLimitSpinner.setEditable(true);
             rowLimitSpinner.setPrefWidth(100);
 
@@ -308,8 +351,26 @@ public class DatabaseStepController extends BaseStepController {
 
             root = new VBox(header, detailBox);
             root.getStyleClass().add("db-table-row");
+            root.setUserData(tableName);
 
             header.setOnMouseClicked(e -> toggleExpand(expandIcon));
+        }
+
+        TableRowView(TableConfig config) {
+            this(config.tableName());
+            ddlCheckBox.setSelected(config.exportDdl());
+            dataCheckBox.setSelected(config.exportData());
+            rowLimitSpinner.getValueFactory().setValue(config.rowLimit());
+            whereField.setText(config.whereClause() != null ? config.whereClause() : "");
+            orderByField.setText(config.orderByClause() != null ? config.orderByClause() : "");
+        }
+
+        void wireOnChange(Runnable onChange) {
+            ddlCheckBox.selectedProperty().addListener((obs, old, val) -> onChange.run());
+            dataCheckBox.selectedProperty().addListener((obs, old, val) -> onChange.run());
+            rowLimitSpinner.valueProperty().addListener((obs, old, val) -> onChange.run());
+            whereField.textProperty().addListener((obs, old, val) -> onChange.run());
+            orderByField.textProperty().addListener((obs, old, val) -> onChange.run());
         }
 
         private void toggleExpand(Label icon) {

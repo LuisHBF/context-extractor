@@ -20,7 +20,7 @@
 
                 <VBox spacing="6">
                     <Label text="Select Agent File" styleClass="step-section-title"/>
-                    <Label text="Choose a .md or .agent file that will guide the AI's behavior."
+                    <Label text="Optionally provide a .md or .agent file to guide the AI's behavior. Skip this if you have no system prompt."
                            styleClass="step-description" wrapText="true"/>
                 </VBox>
 

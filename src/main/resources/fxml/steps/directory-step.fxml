@@ -1,66 +1,52 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ListView?>
-<?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane xmlns="http://javafx.com/javafx/21"
+<BorderPane fx:id="rootPane"
+            xmlns="http://javafx.com/javafx/21"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.contextextractor.presentation.steps.DirectoryStepController"
             styleClass="step-pane">
 
+    <top>
+        <VBox styleClass="dir-header" spacing="8">
+            <Label text="Files" styleClass="step-section-title"/>
+            <Label text="Optionally scan directories or add individual files to include in the context. Skip this step if your context is database or notes only."
+                   styleClass="step-description" wrapText="true"/>
+            <HBox spacing="12" alignment="CENTER_LEFT">
+                <Button text="+ Add Directory" styleClass="browse-button" onAction="#onAddDirectory"/>
+                <Button text="+ Add Files" styleClass="browse-button" onAction="#onAddFiles"/>
+                <Label text="or drop files and folders here ↓" styleClass="drop-hint-label"/>
+            </HBox>
+        </VBox>
+    </top>
+
     <center>
-        <ScrollPane fitToWidth="true" styleClass="step-scroll">
-            <VBox styleClass="step-content" spacing="24">
-
-                <VBox spacing="6">
-                    <Label text="Select Project Directory" styleClass="step-section-title"/>
-                    <Label text="Select a package or module directory. All files will be scanned recursively."
-                           styleClass="step-description" wrapText="true"/>
-                </VBox>
-
-                <HBox spacing="10" alignment="CENTER_LEFT">
-                    <TextField fx:id="directoryPathField"
-                               promptText="No directory selected"
-                               editable="false"
-                               HBox.hgrow="ALWAYS"/>
-                    <Button text="Browse…" styleClass="browse-button" onAction="#onBrowse"/>
-                </HBox>
-
-                <HBox alignment="CENTER_LEFT">
-                    <ProgressIndicator fx:id="progressIndicator"
-                                       prefWidth="40" prefHeight="40"
-                                       visible="false" managed="false"/>
-                </HBox>
-
-                <VBox fx:id="summaryBox" spacing="12" visible="false" managed="false">
-                    <HBox spacing="24" alignment="CENTER_LEFT">
-                        <Label fx:id="filesFoundLabel" styleClass="files-found-label"/>
-                        <Label fx:id="filesSkippedLabel" styleClass="files-skipped-label"/>
-                    </HBox>
-                    <Label fx:id="noFilesLabel"
-                           text="No readable files found in this directory."
-                           styleClass="warning-label"
-                           visible="false" managed="false"/>
-                    <ListView fx:id="fileListView" prefHeight="300" VBox.vgrow="ALWAYS"/>
-                </VBox>
-
+        <ScrollPane styleClass="step-scroll" fitToWidth="true">
+            <VBox fx:id="sourceListContainer" styleClass="source-list-content" spacing="8">
+                <Label fx:id="emptyStateLabel"
+                       text="No sources added yet. Use the buttons above or drag files here."
+                       styleClass="review-empty-state" wrapText="true"/>
             </VBox>
         </ScrollPane>
     </center>
 
     <bottom>
-        <HBox styleClass="step-nav-bar" alignment="CENTER_LEFT" spacing="12">
-            <Button fx:id="backButton" text="← Back" styleClass="back-button" onAction="#onBack"/>
-            <Region HBox.hgrow="ALWAYS"/>
-            <Button fx:id="nextButton" text="Next →" styleClass="next-button" onAction="#onNext"/>
-        </HBox>
+        <VBox>
+            <HBox styleClass="dir-summary-bar" alignment="CENTER_LEFT">
+                <Label fx:id="summaryLabel" text="No files selected" styleClass="step-description"/>
+            </HBox>
+            <HBox styleClass="step-nav-bar" alignment="CENTER_LEFT" spacing="12">
+                <Button fx:id="backButton" text="← Back" styleClass="back-button" onAction="#onBack"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button fx:id="nextButton" text="Next →" styleClass="next-button" onAction="#onNext"/>
+            </HBox>
+        </VBox>
     </bottom>
 
 </BorderPane>

@@ -100,6 +100,15 @@
     -fx-stroke-width: 0;
 }
 
+/* Optional badge below step name */
+.step-optional-badge {
+    -fx-background-color: #F3F4F6;
+    -fx-background-radius: 4;
+    -fx-text-fill: #9CA3AF;
+    -fx-font-size: 10px;
+    -fx-padding: 1 5 1 5;
+}
+
 /* Step number / checkmark label */
 .step-number {
     -fx-font-size: 12px;
@@ -330,6 +339,41 @@
 .db-table-detail {
     -fx-border-color: #E5E7EB;
     -fx-border-width: 1 0 0 0;
+}
+
+/* ── Directory step ───────────────────────────────────────────────────────── */
+
+.dir-header {
+    -fx-background-color: -color-bg-overlay;
+    -fx-border-color: #E5E7EB;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 24 48 16 48;
+}
+
+.drop-hint-label {
+    -fx-text-fill: #6B7280;
+    -fx-font-size: 13px;
+    -fx-font-style: italic;
+}
+
+.source-list-content {
+    -fx-padding: 24 48 24 48;
+    -fx-background-color: -color-bg-default;
+}
+
+.dir-summary-bar {
+    -fx-background-color: -color-bg-overlay;
+    -fx-border-color: #E5E7EB;
+    -fx-border-width: 1 0 0 0;
+    -fx-padding: 8 48 8 48;
+}
+
+/* ── Review empty state ──────────────────────────────────────────────────── */
+
+.review-empty-state {
+    -fx-text-fill: #9CA3AF;
+    -fx-font-size: 13px;
+    -fx-font-style: italic;
 }
 
 /* ── Review step ─────────────────────────────────────────────────────────── */

@@ -26,7 +26,7 @@
                 <!-- Connection section -->
                 <VBox spacing="16">
                     <Label text="Database Connection" styleClass="step-section-title"/>
-                    <Label text="Connect to a PostgreSQL database to include schema definitions and sample data in the context."
+                    <Label text="Optionally connect to a PostgreSQL database to include schema and sample data. Skip this if your context is code-only."
                            styleClass="step-description" wrapText="true"/>
 
                     <HBox spacing="12">
@@ -90,6 +90,13 @@
                             <Spinner fx:id="defaultRowLimit" editable="true" prefWidth="90"/>
                         </HBox>
                     </VBox>
+
+                    <TextField fx:id="tableSearchField"
+                               promptText="⌕  Search tables..."/>
+
+                    <Label fx:id="noTablesMatchLabel"
+                           styleClass="step-description" wrapText="true"
+                           visible="false" managed="false"/>
 
                     <!-- Dynamically populated table rows -->
                     <VBox fx:id="tableListContainer" spacing="4"/>

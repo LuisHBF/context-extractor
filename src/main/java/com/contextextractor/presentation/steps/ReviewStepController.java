@@ -6,7 +6,8 @@ import com.contextextractor.domain.model.AgentConfig;
 import com.contextextractor.domain.model.AppSettings;
 import com.contextextractor.domain.model.ContextPayload;
 import com.contextextractor.domain.model.DatabaseConfig;
-import com.contextextractor.domain.model.DirectoryConfig;
+import com.contextextractor.domain.model.FileSource;
+import com.contextextractor.domain.model.FileSourceConfig;
 import com.contextextractor.domain.model.Preset;
 import com.contextextractor.domain.model.ScannedFile;
 import com.contextextractor.domain.model.TableConfig;
@@ -56,6 +57,8 @@ public class ReviewStepController extends BaseStepController {
     @FXML private Label presetSaveStatusLabel;
     @FXML private TextField outputFileNameField;
 
+    private Path lastOutputDirectory;
+
     @Override
     public void onNavigatedTo(int stepIndex) {
         super.onNavigatedTo(stepIndex);
@@ -64,14 +67,20 @@ public class ReviewStepController extends BaseStepController {
 
     private void populateReviewCards() {
         AgentConfig ac = mainController.getAgentConfig();
-        agentReviewLabel.setText(ac != null ? ac.filePath().toString() : "(none)");
+        setReviewCard(agentReviewLabel,
+                ac != null ? ac.filePath().toString() : null,
+                "No agent selected — the AI will operate without a system prompt.");
 
-        DirectoryConfig dc = mainController.getDirectoryConfig();
-        if (dc != null) {
-            directoryReviewLabel.setText(dc.rootPath().toString()
-                    + "\n" + dc.files().size() + " files selected");
+        FileSourceConfig fsc = mainController.getFileSourceConfig();
+        if (fsc != null && !fsc.sources().isEmpty()) {
+            int total = fsc.allFiles().size();
+            int srcs = fsc.sources().size();
+            setReviewCard(directoryReviewLabel,
+                    srcs + (srcs == 1 ? " source" : " sources") + ", " + total + (total == 1 ? " file" : " files"),
+                    null);
         } else {
-            directoryReviewLabel.setText("(none)");
+            setReviewCard(directoryReviewLabel, null,
+                    "No files selected — only database and context will be included.");
         }
 
         DatabaseConfig dbc = mainController.getDatabaseConfig();
@@ -84,21 +93,33 @@ public class ReviewStepController extends BaseStepController {
                 sb.append("\n").append(tables.size()).append(" table(s): ");
                 sb.append(tables.stream().map(TableConfig::tableName).collect(Collectors.joining(", ")));
             }
-            databaseReviewLabel.setText(sb.toString());
+            setReviewCard(databaseReviewLabel, sb.toString(), null);
         } else {
-            databaseReviewLabel.setText("(none)");
+            setReviewCard(databaseReviewLabel, null,
+                    "No database configured — only files and context will be included.");
         }
 
         String ctx = mainController.getAdditionalContext();
-        if (ctx != null && !ctx.isBlank()) {
-            additionalContextReviewLabel.setText(ctx.length() > 200 ? ctx.substring(0, 200) + "..." : ctx);
-        } else {
-            additionalContextReviewLabel.setText("(none)");
-        }
+        setReviewCard(additionalContextReviewLabel,
+                (ctx != null && !ctx.isBlank()) ? (ctx.length() > 200 ? ctx.substring(0, 200) + "..." : ctx) : null,
+                "No additional context provided.");
 
         AppSettings settings = mainController.getSettings();
-        String downloadsPath = System.getProperty("user.home") + "/Downloads";
-        outputReviewLabel.setText("Max file size: " + settings.maxXmlSizeMb() + " MB\nOutput: " + downloadsPath);
+        String configuredDir = settings.outputDirectory();
+        String outputPath = (configuredDir != null && !configuredDir.isBlank())
+                ? configuredDir
+                : System.getProperty("user.home") + "/Downloads";
+        outputReviewLabel.setText("Max file size: " + settings.maxXmlSizeMb() + " MB\nOutput: " + outputPath);
+    }
+
+    private void setReviewCard(Label label, String content, String emptyMessage) {
+        label.getStyleClass().removeAll("review-empty-state");
+        if (content != null) {
+            label.setText(content);
+        } else {
+            label.setText(emptyMessage);
+            label.getStyleClass().add("review-empty-state");
+        }
     }
 
     @FXML
@@ -134,6 +155,7 @@ public class ReviewStepController extends BaseStepController {
             progressStatusLabel.textProperty().unbind();
 
             List<Path> files = task.getValue().outputFiles();
+            if (!files.isEmpty()) lastOutputDirectory = files.get(0).getParent();
             resultFilesLabel.setText(files.stream().map(Path::toString).collect(Collectors.joining("\n")));
             resultPanel.setVisible(true);
             resultPanel.setManaged(true);
@@ -156,9 +178,10 @@ public class ReviewStepController extends BaseStepController {
     }
 
     @FXML
-    private void onOpenDownloads() {
+    private void onOpenOutputFolder() {
+        if (lastOutputDirectory == null) return;
         try {
-            Desktop.getDesktop().open(new File(System.getProperty("user.home"), "Downloads"));
+            Desktop.getDesktop().open(lastOutputDirectory.toFile());
         } catch (IOException ignored) {
         }
     }
@@ -169,8 +192,9 @@ public class ReviewStepController extends BaseStepController {
         savePresetPanel.setVisible(show);
         savePresetPanel.setManaged(show);
         if (show) {
-            DirectoryConfig dc = mainController.getDirectoryConfig();
-            String suggestion = dc != null ? dc.rootPath().getFileName().toString() : "";
+            FileSourceConfig fsc = mainController.getFileSourceConfig();
+            String suggestion = (fsc != null && !fsc.sources().isEmpty())
+                    ? fsc.sources().get(0).path().getFileName().toString() : "";
             presetNameField.setText(suggestion);
             presetSaveStatusLabel.setText("");
         }
@@ -199,9 +223,9 @@ public class ReviewStepController extends BaseStepController {
         if (ac != null) agentContent = ac.content();
 
         Map<String, String> files = new LinkedHashMap<>();
-        DirectoryConfig dc = mainController.getDirectoryConfig();
-        if (dc != null) {
-            for (ScannedFile f : dc.files()) {
+        FileSourceConfig fsc = mainController.getFileSourceConfig();
+        if (fsc != null) {
+            for (ScannedFile f : fsc.allFiles()) {
                 files.put(f.relativePath(), f.content());
             }
         }
@@ -221,13 +245,19 @@ public class ReviewStepController extends BaseStepController {
 
     private Preset buildPreset(String name) {
         AgentConfig ac = mainController.getAgentConfig();
-        DirectoryConfig dc = mainController.getDirectoryConfig();
+        FileSourceConfig fsc = mainController.getFileSourceConfig();
         DatabaseConfig dbc = mainController.getDatabaseConfig();
+
+        List<Preset.PresetSource> presetSources = fsc != null
+                ? fsc.sources().stream()
+                        .map(s -> new Preset.PresetSource(s.type().name(), s.path().toString()))
+                        .toList()
+                : List.of();
 
         return new Preset(
                 name,
                 ac != null ? ac.filePath().toString() : "",
-                dc != null ? dc.rootPath().toString() : "",
+                presetSources,
                 dbc,
                 dbc != null ? dbc.schema() : "",
                 mainController.getTableConfigs() != null ? mainController.getTableConfigs() : List.of(),

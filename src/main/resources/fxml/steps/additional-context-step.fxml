@@ -18,7 +18,7 @@
         <ScrollPane styleClass="step-scroll" fitToWidth="true">
             <VBox styleClass="step-content" spacing="16">
                 <Label text="Additional Context" styleClass="step-section-title"/>
-                <Label text="Add any extra information, business rules, or instructions for the AI."
+                <Label text="Optionally add free-form notes, business rules, or instructions for the AI. Leave blank to skip."
                        styleClass="step-description" wrapText="true"/>
                 <TextArea fx:id="contextArea"
                           promptText="Type anything you want the AI to know about this project..."

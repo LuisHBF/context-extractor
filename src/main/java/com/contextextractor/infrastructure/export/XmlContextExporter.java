@@ -134,7 +134,7 @@ public class XmlContextExporter implements ContextExportStrategy {
         sb.append("<context")
           .append(" generated-at=\"").append(generatedAt).append("\"")
           .append(" preset=\"").append(escapeAttr(presetName)).append("\"")
-          .append(" generator=\"context-extractor/1.0.0\">\n\n");
+          .append(" generator=\"context-extractor/1.1.0\">\n\n");
 
         if (payload.agentContent() != null && !payload.agentContent().isBlank()) {
             sb.append("    <agent>\n");

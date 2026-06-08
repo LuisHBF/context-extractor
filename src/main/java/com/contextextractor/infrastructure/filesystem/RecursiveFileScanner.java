@@ -75,6 +75,17 @@ public class RecursiveFileScanner {
         return lastSkippedCount;
     }
 
+    public List<ScannedFile> scanSingle(Path file) {
+        if (isExcluded(file.getFileName().toString())) return List.of();
+        try {
+            String content = Files.readString(file, StandardCharsets.UTF_8);
+            if (content.indexOf('\0') >= 0) return List.of();
+            return List.of(new ScannedFile(file.getFileName().toString(), content));
+        } catch (IOException e) {
+            return List.of();
+        }
+    }
+
     private boolean isExcluded(String name) {
         String lower = name.toLowerCase();
         return settings.excludedPatterns().stream()

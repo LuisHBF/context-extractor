@@ -19,7 +19,7 @@
             <VBox styleClass="step-content" spacing="24">
 
                 <Label text="Review &amp; Generate" styleClass="step-section-title"/>
-                <Label text="Check your selections, then generate the AI context file."
+                <Label text="Review your selections below. Any skipped steps will simply be omitted from the generated file."
                        styleClass="step-description" wrapText="true"/>
 
                 <!-- Review cards -->
@@ -87,8 +87,8 @@
                           visible="false" managed="false">
                         <Label text="Generated successfully!" styleClass="result-title-success"/>
                         <Label fx:id="resultFilesLabel" wrapText="true" styleClass="step-description"/>
-                        <Button text="Open Downloads Folder" styleClass="browse-button"
-                                onAction="#onOpenDownloads"/>
+                        <Button text="Open Output Folder" styleClass="browse-button"
+                                onAction="#onOpenOutputFolder"/>
                     </VBox>
 
                     <!-- Error result -->

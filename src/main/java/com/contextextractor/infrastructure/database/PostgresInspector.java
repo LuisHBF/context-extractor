@@ -175,6 +175,49 @@ public class PostgresInspector implements DatabaseInspectorStrategy {
             colDefs.add("    PRIMARY KEY (" + String.join(", ", pkCols) + ")");
         }
 
+        String fkSql = """
+                SELECT tc.constraint_name, kcu.column_name,
+                       ccu.table_schema AS foreign_schema,
+                       ccu.table_name   AS foreign_table,
+                       ccu.column_name  AS foreign_column
+                FROM information_schema.table_constraints tc
+                JOIN information_schema.key_column_usage kcu
+                    ON tc.constraint_name = kcu.constraint_name
+                    AND tc.table_schema   = kcu.table_schema
+                JOIN information_schema.constraint_column_usage ccu
+                    ON ccu.constraint_name = tc.constraint_name
+                    AND ccu.table_schema   = tc.table_schema
+                WHERE tc.constraint_type = 'FOREIGN KEY'
+                  AND tc.table_schema = ?
+                  AND tc.table_name   = ?
+                ORDER BY tc.constraint_name, kcu.ordinal_position
+                """;
+
+        Map<String, List<String>> fkLocalCols = new LinkedHashMap<>();
+        Map<String, String> fkForeignTable = new LinkedHashMap<>();
+        Map<String, List<String>> fkForeignCols = new LinkedHashMap<>();
+
+        try (PreparedStatement ps = conn.prepareStatement(fkSql)) {
+            ps.setString(1, schema);
+            ps.setString(2, tableName);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    String name = rs.getString("constraint_name");
+                    fkLocalCols.computeIfAbsent(name, k -> new ArrayList<>()).add(rs.getString("column_name"));
+                    fkForeignTable.putIfAbsent(name,
+                            rs.getString("foreign_schema") + "." + rs.getString("foreign_table"));
+                    fkForeignCols.computeIfAbsent(name, k -> new ArrayList<>()).add(rs.getString("foreign_column"));
+                }
+            }
+        }
+
+        for (String constraintName : fkLocalCols.keySet()) {
+            colDefs.add("    CONSTRAINT " + constraintName
+                    + " FOREIGN KEY (" + String.join(", ", fkLocalCols.get(constraintName)) + ")"
+                    + " REFERENCES " + fkForeignTable.get(constraintName)
+                    + " (" + String.join(", ", fkForeignCols.get(constraintName)) + ")");
+        }
+
         return "CREATE TABLE " + schema + "." + tableName + " (\n"
                 + String.join(",\n", colDefs)
                 + "\n);";

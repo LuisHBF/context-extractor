@@ -63,7 +63,7 @@ public class StepperSidebar extends VBox {
         settingsBtn.setOnAction(e -> { if (onSettingsClicked != null) onSettingsClicked.run(); });
         VBox.setMargin(settingsBtn, new Insets(0, 0, 8, 12));
 
-        Label aboutLabel = new Label("ⓘ  v1.0.0");
+        Label aboutLabel = new Label("ⓘ  v1.1.0");
         aboutLabel.getStyleClass().add("sidebar-about-label");
         aboutLabel.setCursor(Cursor.HAND);
         aboutLabel.setOnMouseClicked(e -> showAboutDialog());
@@ -89,7 +89,11 @@ public class StepperSidebar extends VBox {
         stepLabel.getStyleClass().add("step-label");
         stepLabels.add(stepLabel);
 
-        HBox row = new HBox(12, indicator, stepLabel);
+        Label optionalBadge = new Label("optional");
+        optionalBadge.getStyleClass().add("step-optional-badge");
+
+        VBox labelBox = new VBox(2, stepLabel, optionalBadge);
+        HBox row = new HBox(12, indicator, labelBox);
         row.setAlignment(Pos.CENTER_LEFT);
         row.setPadding(new Insets(5, 16, 5, ROW_LEFT_PADDING));
         rows.add(row);
@@ -123,7 +127,7 @@ public class StepperSidebar extends VBox {
     }
 
     private void showAboutDialog() {
-        Label title = new Label("Context Extractor  v1.0.0");
+        Label title = new Label("Context Extractor  v1.1.0");
         title.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #1E1E2E;");
 
         Label author = new Label("Developed by Luis Franco");
