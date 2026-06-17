@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<?import atlantafx.base.controls.ToggleSwitch?>
 <?import com.contextextractor.presentation.components.TagListEditor?>
 <?import javafx.scene.control.Alert?>
 <?import javafx.scene.control.Button?>
@@ -20,6 +21,18 @@
             <VBox styleClass="step-content" spacing="32">
 
                 <Label text="Settings" styleClass="step-section-title"/>
+
+                <!-- Appearance section -->
+                <VBox spacing="10">
+                    <Label text="APPEARANCE" styleClass="step-label-text"/>
+                    <HBox alignment="CENTER_LEFT" spacing="12">
+                        <ToggleSwitch fx:id="darkModeToggle"/>
+                        <VBox spacing="2">
+                            <Label text="Dark Mode" styleClass="step-description"/>
+                            <Label text="Switch between light and dark theme." styleClass="step-description"/>
+                        </VBox>
+                    </HBox>
+                </VBox>
 
                 <!-- Export section -->
                 <VBox spacing="10">

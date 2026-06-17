@@ -20,7 +20,7 @@ public class TagListEditor extends VBox {
     private final FlowPane chipsPane = new FlowPane();
     private final TextField addField = new TextField();
     private final List<String> values = new ArrayList<>();
-    private final SimpleObjectProperty<List<String>> valuesProperty = new SimpleObjectProperty<>(List.of());
+    private final ObjectProperty<List<String>> valuesProperty = new SimpleObjectProperty<>(List.of());
 
     public TagListEditor() {
         chipsPane.setHgap(6);

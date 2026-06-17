@@ -4,6 +4,7 @@ import com.contextextractor.domain.model.Preset;
 import com.contextextractor.infrastructure.persistence.PresetRepository;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 public class LoadPresetUseCase {
@@ -11,7 +12,7 @@ public class LoadPresetUseCase {
     private final PresetRepository repository;
 
     public LoadPresetUseCase(PresetRepository repository) {
-        this.repository = repository;
+        this.repository = Objects.requireNonNull(repository, "repository must not be null");
     }
 
     public List<Preset> loadAll() {

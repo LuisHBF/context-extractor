@@ -8,6 +8,7 @@ import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
@@ -24,8 +25,11 @@ import javafx.scene.layout.VBox;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class DatabaseStepController extends BaseStepController {
+
+    private static final int DEFAULT_PORT = 5432;
 
     @FXML private TextField hostField;
     @FXML private TextField portField;
@@ -50,6 +54,7 @@ public class DatabaseStepController extends BaseStepController {
     private final PostgresInspector inspector = new PostgresInspector();
     private final List<TableRowView> tableRows = new ArrayList<>();
     private Task<?> currentTask;
+    private boolean initialized;
 
     @FXML
     private void initialize() {
@@ -60,8 +65,10 @@ public class DatabaseStepController extends BaseStepController {
     @Override
     public void onNavigatedTo(int stepIndex) {
         super.onNavigatedTo(stepIndex);
+        if (initialized) return;
+        initialized = true;
         DatabaseConfig existing = mainController.getDatabaseConfig();
-        if (existing != null && !existing.host().isBlank()) {
+        if (Objects.nonNull(existing) && !existing.host().isBlank()) {
             hostField.setText(existing.host());
             portField.setText(String.valueOf(existing.port()));
             databaseField.setText(existing.database());
@@ -75,9 +82,9 @@ public class DatabaseStepController extends BaseStepController {
                 schemaSection.setManaged(true);
 
                 List<TableConfig> saved = mainController.getTableConfigs();
-                if (saved != null && !saved.isEmpty()) {
-                    for (TableConfig tc : saved) {
-                        TableRowView row = new TableRowView(tc);
+                if (Objects.nonNull(saved) && !saved.isEmpty()) {
+                    for (TableConfig tableConfig : saved) {
+                        TableRowView row = new TableRowView(tableConfig);
                         row.wireOnChange(this::saveToMain);
                         tableRows.add(row);
                         tableListContainer.getChildren().add(row.root());
@@ -102,7 +109,7 @@ public class DatabaseStepController extends BaseStepController {
         int port;
         try {
             String portText = portField.getText().trim();
-            port = Integer.parseInt(portText.isEmpty() ? "5432" : portText);
+            port = Integer.parseInt(portText.isEmpty() ? String.valueOf(DEFAULT_PORT) : portText);
         } catch (NumberFormatException e) {
             showStatus("Invalid port number.", false);
             return;
@@ -135,7 +142,7 @@ public class DatabaseStepController extends BaseStepController {
 
         task.setOnFailed(e -> {
             String msg = task.getException().getMessage();
-            showStatus("Connection failed: " + (msg != null ? msg : "unknown error"), false);
+            showStatus("Connection failed: " + (Objects.nonNull(msg) ? msg : "unknown error"), false);
         });
 
         currentTask = task;
@@ -147,7 +154,7 @@ public class DatabaseStepController extends BaseStepController {
     @FXML
     private void onSchemaSelected() {
         String schema = schemaComboBox.getValue();
-        if (schema == null) return;
+        if (Objects.isNull(schema)) return;
 
         String host = hostField.getText().trim();
         String database = databaseField.getText().trim();
@@ -187,7 +194,7 @@ public class DatabaseStepController extends BaseStepController {
 
         task.setOnFailed(e -> {
             String msg = task.getException().getMessage();
-            showStatus("Failed to load tables: " + (msg != null ? msg : "unknown error"), false);
+            showStatus("Failed to load tables: " + (Objects.nonNull(msg) ? msg : "unknown error"), false);
         });
 
         currentTask = task;
@@ -220,7 +227,7 @@ public class DatabaseStepController extends BaseStepController {
         String database = databaseField.getText().trim();
         if (!host.isEmpty() && !database.isEmpty()) {
             int port = parsePort();
-            String schema = schemaComboBox.getValue() != null ? schemaComboBox.getValue() : "";
+            String schema = Objects.nonNull(schemaComboBox.getValue()) ? schemaComboBox.getValue() : "";
             DatabaseConfig config = new DatabaseConfig(host, port, database,
                     usernameField.getText().trim(), passwordField.getText(), schema);
             mainController.setDatabaseConfig(config);
@@ -230,10 +237,10 @@ public class DatabaseStepController extends BaseStepController {
 
     private int parsePort() {
         try {
-            String p = portField.getText().trim();
-            return Integer.parseInt(p.isEmpty() ? "5432" : p);
+            String portText = portField.getText().trim();
+            return Integer.parseInt(portText.isEmpty() ? String.valueOf(DEFAULT_PORT) : portText);
         } catch (NumberFormatException e) {
-            return 5432;
+            return DEFAULT_PORT;
         }
     }
 
@@ -256,9 +263,9 @@ public class DatabaseStepController extends BaseStepController {
     }
 
     private void applyTableFilter(String filter) {
-        String lower = filter == null ? "" : filter.strip().toLowerCase();
+        String lower = Objects.isNull(filter) ? "" : filter.strip().toLowerCase();
         boolean anyVisible = false;
-        for (var node : tableListContainer.getChildren()) {
+        for (Node node : tableListContainer.getChildren()) {
             Object userData = node.getUserData();
             String name = userData instanceof String s ? s.toLowerCase() : "";
             boolean match = lower.isEmpty() || name.contains(lower);
@@ -273,7 +280,7 @@ public class DatabaseStepController extends BaseStepController {
     }
 
     private void cancelCurrentTask() {
-        if (currentTask != null && currentTask.isRunning()) {
+        if (Objects.nonNull(currentTask) && currentTask.isRunning()) {
             currentTask.cancel();
         }
         if (connectionProgress.visibleProperty().isBound()) {
@@ -309,60 +316,60 @@ public class DatabaseStepController extends BaseStepController {
 
             Label expandIcon = new Label("▶");
             expandIcon.getStyleClass().add("db-expand-icon");
-
             Label nameLabel = new Label(tableName);
             nameLabel.getStyleClass().add("db-table-name");
-
             ddlCheckBox = new CheckBox("DDL");
-            ddlCheckBox.setSelected(false);
             dataCheckBox = new CheckBox("Data");
-            dataCheckBox.setSelected(false);
-
-            Region spacer = new Region();
-            HBox.setHgrow(spacer, Priority.ALWAYS);
-
-            HBox header = new HBox(8, expandIcon, nameLabel, spacer, ddlCheckBox, dataCheckBox);
-            header.setAlignment(Pos.CENTER_LEFT);
-            header.getStyleClass().add("db-table-header");
-            header.setPadding(new Insets(8, 12, 8, 12));
-            header.setCursor(Cursor.HAND);
 
             whereField = new TextField();
             whereField.setPromptText("WHERE clause (optional, e.g. status = 'active')");
             orderByField = new TextField();
             orderByField.setPromptText("ORDER BY clause (optional, e.g. created_at DESC)");
-
             rowLimitSpinner = new Spinner<>();
             rowLimitSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 100000, 5));
             rowLimitSpinner.setEditable(true);
             rowLimitSpinner.setPrefWidth(100);
 
-            HBox limitRow = new HBox(8, new Label("Row limit:"), rowLimitSpinner);
-            limitRow.setAlignment(Pos.CENTER_LEFT);
-
-            VBox whereBox = new VBox(4, new Label("WHERE"), whereField);
-            VBox orderByBox = new VBox(4, new Label("ORDER BY"), orderByField);
-
-            detailBox = new VBox(8, whereBox, orderByBox, limitRow);
-            detailBox.setPadding(new Insets(8, 12, 12, 32));
-            detailBox.getStyleClass().add("db-table-detail");
-            detailBox.setVisible(false);
-            detailBox.setManaged(false);
+            HBox header = buildTableHeader(expandIcon, nameLabel);
+            header.setOnMouseClicked(e -> toggleExpand(expandIcon));
+            detailBox = buildDetailPanel();
 
             root = new VBox(header, detailBox);
             root.getStyleClass().add("db-table-row");
             root.setUserData(tableName);
-
-            header.setOnMouseClicked(e -> toggleExpand(expandIcon));
         }
 
-        TableRowView(TableConfig config) {
-            this(config.tableName());
-            ddlCheckBox.setSelected(config.exportDdl());
-            dataCheckBox.setSelected(config.exportData());
-            rowLimitSpinner.getValueFactory().setValue(config.rowLimit());
-            whereField.setText(config.whereClause() != null ? config.whereClause() : "");
-            orderByField.setText(config.orderByClause() != null ? config.orderByClause() : "");
+        TableRowView(TableConfig tableConfig) {
+            this(tableConfig.tableName());
+            ddlCheckBox.setSelected(tableConfig.exportDdl());
+            dataCheckBox.setSelected(tableConfig.exportData());
+            rowLimitSpinner.getValueFactory().setValue(tableConfig.rowLimit());
+            whereField.setText(Objects.nonNull(tableConfig.whereClause()) ? tableConfig.whereClause() : "");
+            orderByField.setText(Objects.nonNull(tableConfig.orderByClause()) ? tableConfig.orderByClause() : "");
+        }
+
+        private HBox buildTableHeader(Label expandIcon, Label nameLabel) {
+            Region spacer = new Region();
+            HBox.setHgrow(spacer, Priority.ALWAYS);
+            HBox header = new HBox(8, expandIcon, nameLabel, spacer, ddlCheckBox, dataCheckBox);
+            header.setAlignment(Pos.CENTER_LEFT);
+            header.getStyleClass().add("db-table-header");
+            header.setPadding(new Insets(8, 12, 8, 12));
+            header.setCursor(Cursor.HAND);
+            return header;
+        }
+
+        private VBox buildDetailPanel() {
+            HBox limitRow = new HBox(8, new Label("Row limit:"), rowLimitSpinner);
+            limitRow.setAlignment(Pos.CENTER_LEFT);
+            VBox whereBox = new VBox(4, new Label("WHERE"), whereField);
+            VBox orderByBox = new VBox(4, new Label("ORDER BY"), orderByField);
+            VBox panel = new VBox(8, whereBox, orderByBox, limitRow);
+            panel.setPadding(new Insets(8, 12, 12, 32));
+            panel.getStyleClass().add("db-table-detail");
+            panel.setVisible(false);
+            panel.setManaged(false);
+            return panel;
         }
 
         void wireOnChange(Runnable onChange) {

@@ -1,15 +1,16 @@
 /* Context Extractor — custom palette on top of AtlantaFX PrimerLight */
 
 .root {
-    -color-bg-default: #F5F7FA;
-    -color-bg-overlay: #FFFFFF;
-    -color-accent-fg: #5B6AF0;
-    -accent-color: #5B6AF0;
+    -color-bg-default:     #F5F7FA;
+    -color-bg-overlay:     #FFFFFF;
+    -color-border-default: #E5E7EB;
+    -color-accent-fg:      #5B6AF0;
+    -accent-color:         #5B6AF0;
     -color-accent-emphasis: #7C3AED;
-    -color-fg-default: #1E1E2E;
-    -color-fg-muted: #6B7280;
-    -color-success-fg: #10B981;
-    -color-danger-fg: #EF4444;
+    -color-fg-default:     #1E1E2E;
+    -color-fg-muted:       #6B7280;
+    -color-success-fg:     #10B981;
+    -color-danger-fg:      #EF4444;
 }
 
 /* ── Root layout ─────────────────────────────────────────────────────────── */
@@ -25,7 +26,7 @@
     -fx-min-height: 56;
     -fx-max-height: 56;
     -fx-padding: 0 20 0 20;
-    -fx-border-color: #E5E7EB;
+    -fx-border-color: -color-border-default;
     -fx-border-width: 0 0 1 0;
     -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.05), 4, 0, 0, 1);
 }
@@ -74,7 +75,7 @@
 
 .stepper-sidebar {
     -fx-background-color: -color-bg-overlay;
-    -fx-border-color: #E5E7EB;
+    -fx-border-color: -color-border-default;
     -fx-border-width: 0 1 0 0;
     -fx-min-width: 220;
     -fx-max-width: 220;
@@ -143,7 +144,7 @@
 
 /* Connector line between steps */
 .step-connector {
-    -fx-background-color: #E5E7EB;
+    -fx-background-color: -color-border-default;
 }
 
 /* Sidebar settings button */
@@ -300,17 +301,17 @@
 }
 
 .db-default-config {
-    -fx-background-color: #F5F7FA;
+    -fx-background-color: -color-bg-default;
     -fx-background-radius: 6;
-    -fx-border-color: #E5E7EB;
+    -fx-border-color: -color-border-default;
     -fx-border-radius: 6;
     -fx-border-width: 1;
     -fx-padding: 12;
 }
 
 .db-table-row {
-    -fx-background-color: white;
-    -fx-border-color: #E5E7EB;
+    -fx-background-color: -color-bg-overlay;
+    -fx-border-color: -color-border-default;
     -fx-border-radius: 6;
     -fx-border-width: 1;
     -fx-background-radius: 6;
@@ -322,7 +323,7 @@
 }
 
 .db-table-header:hover {
-    -fx-background-color: #F5F7FA;
+    -fx-background-color: -color-bg-default;
 }
 
 .db-expand-icon {
@@ -337,7 +338,7 @@
 }
 
 .db-table-detail {
-    -fx-border-color: #E5E7EB;
+    -fx-border-color: -color-border-default;
     -fx-border-width: 1 0 0 0;
 }
 
@@ -345,7 +346,7 @@
 
 .dir-header {
     -fx-background-color: -color-bg-overlay;
-    -fx-border-color: #E5E7EB;
+    -fx-border-color: -color-border-default;
     -fx-border-width: 0 0 1 0;
     -fx-padding: 24 48 16 48;
 }
@@ -363,7 +364,7 @@
 
 .dir-summary-bar {
     -fx-background-color: -color-bg-overlay;
-    -fx-border-color: #E5E7EB;
+    -fx-border-color: -color-border-default;
     -fx-border-width: 1 0 0 0;
     -fx-padding: 8 48 8 48;
 }
@@ -379,12 +380,22 @@
 /* ── Review step ─────────────────────────────────────────────────────────── */
 
 .review-card {
-    -fx-background-color: white;
-    -fx-border-color: #E5E7EB;
+    -fx-background-color: -color-bg-overlay;
+    -fx-border-color: -color-border-default;
     -fx-border-radius: 6;
     -fx-background-radius: 6;
     -fx-border-width: 1;
     -fx-padding: 16;
+}
+
+.review-expand-text {
+    -fx-text-fill: -color-accent-fg;
+    -fx-font-size: 12px;
+    -fx-cursor: hand;
+}
+
+.review-expand-text:hover {
+    -fx-text-fill: -color-accent-emphasis;
 }
 
 .generate-button {

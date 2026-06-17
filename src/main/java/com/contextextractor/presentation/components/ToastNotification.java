@@ -37,7 +37,7 @@ public class ToastNotification {
 
         Popup popup = new Popup();
         popup.getContent().add(label);
-        popup.setAutoHide(false);
+        popup.setAutoHide(true);
         popup.show(window,
                 window.getX() + (window.getWidth() - 280) / 2,
                 window.getY() + window.getHeight() - 90);

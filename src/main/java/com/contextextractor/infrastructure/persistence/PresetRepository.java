@@ -12,8 +12,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * Reads and writes {@link Preset} instances as individual JSON files inside a configurable directory.
+ */
 public class PresetRepository {
 
     @JsonIgnoreProperties({"jdbcUrl"})
@@ -26,10 +30,11 @@ public class PresetRepository {
             .addMixIn(com.contextextractor.domain.model.DatabaseConfig.class, DatabaseConfigMixin.class);
 
     public PresetRepository(Path directory) {
-        this.presetsDir = directory;
+        this.presetsDir = Objects.requireNonNull(directory, "directory must not be null");
     }
 
     public void save(Preset preset) {
+        Objects.requireNonNull(preset, "preset must not be null");
         try {
             Files.createDirectories(presetsDir);
             Path file = presetsDir.resolve(sanitize(preset.name()) + ".json");
@@ -46,8 +51,7 @@ public class PresetRepository {
             for (Path file : stream) {
                 try {
                     presets.add(mapper.readValue(file.toFile(), Preset.class));
-                } catch (IOException ignored) {
-                }
+                } catch (IOException ignored) { /* malformed JSON; skip and continue loading other presets */ }
             }
         } catch (IOException e) {
             return List.of();

@@ -8,6 +8,8 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -15,10 +17,14 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 
+import com.contextextractor.domain.model.AppSettings;
+
 import java.awt.Desktop;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 public class StepperSidebar extends VBox {
@@ -60,10 +66,10 @@ public class StepperSidebar extends VBox {
 
         Button settingsBtn = new Button("⚙  Settings");
         settingsBtn.getStyleClass().add("sidebar-settings-button");
-        settingsBtn.setOnAction(e -> { if (onSettingsClicked != null) onSettingsClicked.run(); });
+        settingsBtn.setOnAction(e -> { if (Objects.nonNull(onSettingsClicked)) onSettingsClicked.run(); });
         VBox.setMargin(settingsBtn, new Insets(0, 0, 8, 12));
 
-        Label aboutLabel = new Label("ⓘ  v1.1.0");
+        Label aboutLabel = new Label("ⓘ  v" + AppSettings.VERSION);
         aboutLabel.getStyleClass().add("sidebar-about-label");
         aboutLabel.setCursor(Cursor.HAND);
         aboutLabel.setOnMouseClicked(e -> showAboutDialog());
@@ -100,7 +106,7 @@ public class StepperSidebar extends VBox {
 
         final int idx = index;
         row.setOnMouseClicked(e -> {
-            if (onStepClicked != null) onStepClicked.accept(idx);
+            if (Objects.nonNull(onStepClicked)) onStepClicked.accept(idx);
         });
 
         return row;
@@ -126,12 +132,23 @@ public class StepperSidebar extends VBox {
         refresh();
     }
 
+    public void resetAll() {
+        Arrays.fill(completed, false);
+        refresh();
+    }
+
     private void showAboutDialog() {
-        Label title = new Label("Context Extractor  v1.1.0");
-        title.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #1E1E2E;");
+        ImageView logo = new ImageView(new Image(
+                Objects.requireNonNull(getClass().getResourceAsStream("/assets/logo-256.png"))));
+        logo.setFitWidth(384);
+        logo.setFitHeight(384);
+        logo.setPreserveRatio(true);
+
+        Label title = new Label("Context Extractor  v" + AppSettings.VERSION);
+        title.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: -color-fg-default;");
 
         Label author = new Label("Developed by Luis Franco");
-        author.setStyle("-fx-font-size: 12px; -fx-text-fill: #6B7280;");
+        author.setStyle("-fx-font-size: 12px; -fx-text-fill: -color-fg-muted;");
 
         Hyperlink link = new Hyperlink("github.com/LuisHBF/content-extractor");
         link.setStyle("-fx-font-size: 12px;");
@@ -141,7 +158,7 @@ public class StepperSidebar extends VBox {
             } catch (Exception ignored) {}
         });
 
-        VBox content = new VBox(6, title, author, link);
+        VBox content = new VBox(8, logo, title, author, link);
         content.setPadding(new Insets(8, 4, 4, 4));
 
         Dialog<Void> dialog = new Dialog<>();
@@ -149,6 +166,7 @@ public class StepperSidebar extends VBox {
         dialog.setHeaderText(null);
         dialog.getDialogPane().setContent(content);
         dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
+        dialog.getDialogPane().getStylesheets().addAll(getScene().getStylesheets());
         dialog.showAndWait();
     }
 

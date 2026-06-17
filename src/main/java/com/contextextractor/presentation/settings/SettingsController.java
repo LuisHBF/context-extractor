@@ -1,8 +1,9 @@
 package com.contextextractor.presentation.settings;
 
+import atlantafx.base.controls.ToggleSwitch;
 import com.contextextractor.domain.model.AppSettings;
-import com.contextextractor.infrastructure.persistence.SettingsRepository;
 import com.contextextractor.presentation.MainController;
+import com.contextextractor.presentation.ThemeManager;
 import com.contextextractor.presentation.components.TagListEditor;
 import com.contextextractor.presentation.components.ToastNotification;
 import javafx.fxml.FXML;
@@ -14,9 +15,11 @@ import javafx.scene.control.TextField;
 import javafx.stage.DirectoryChooser;
 
 import java.io.File;
+import java.util.Objects;
 
 public class SettingsController {
 
+    @FXML private ToggleSwitch darkModeToggle;
     @FXML private Spinner<Integer> maxSizeSpinner;
     @FXML private TagListEditor tagListEditor;
     @FXML private TextField outputDirField;
@@ -32,14 +35,28 @@ public class SettingsController {
     private void initialize() {
         maxSizeSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 100, 6));
         maxSizeSpinner.setEditable(true);
+        darkModeToggle.selectedProperty().addListener((obs, oldVal, newVal) -> {
+            if (Objects.nonNull(darkModeToggle.getScene())) {
+                ThemeManager.apply(darkModeToggle.getScene(), newVal);
+                AppSettings current = mainController.getSettings();
+                AppSettings updated = new AppSettings(
+                        current.maxXmlSizeMb(),
+                        current.excludedPatterns(),
+                        current.outputDirectory(),
+                        current.presetsDirectory(),
+                        newVal);
+                mainController.saveSettings(updated);
+            }
+        });
     }
 
     public void onNavigatedToSettings() {
         AppSettings current = mainController.getSettings();
+        darkModeToggle.setSelected(current.darkMode());
         maxSizeSpinner.getValueFactory().setValue(current.maxXmlSizeMb());
         tagListEditor.setValues(current.excludedPatterns());
-        outputDirField.setText(current.outputDirectory() != null ? current.outputDirectory() : "");
-        presetsDirField.setText(current.presetsDirectory() != null ? current.presetsDirectory() : "");
+        outputDirField.setText(Objects.nonNull(current.outputDirectory()) ? current.outputDirectory() : "");
+        presetsDirField.setText(Objects.nonNull(current.presetsDirectory()) ? current.presetsDirectory() : "");
     }
 
     @FXML
@@ -48,9 +65,9 @@ public class SettingsController {
                 maxSizeSpinner.getValue(),
                 tagListEditor.getValues(),
                 outputDirField.getText().trim(),
-                presetsDirField.getText().trim());
-        new SettingsRepository().save(updated);
-        mainController.updateSettings(updated);
+                presetsDirField.getText().trim(),
+                darkModeToggle.isSelected());
+        mainController.saveSettings(updated);
         ToastNotification.showSuccess(maxSizeSpinner, "Settings saved \u2713");
     }
 
@@ -63,12 +80,12 @@ public class SettingsController {
         alert.showAndWait().ifPresent(bt -> {
             if (bt == ButtonType.YES) {
                 AppSettings defaults = AppSettings.defaults();
+                darkModeToggle.setSelected(defaults.darkMode());
                 maxSizeSpinner.getValueFactory().setValue(defaults.maxXmlSizeMb());
                 tagListEditor.setValues(defaults.excludedPatterns());
-                outputDirField.setText(defaults.outputDirectory() != null ? defaults.outputDirectory() : "");
-                presetsDirField.setText(defaults.presetsDirectory() != null ? defaults.presetsDirectory() : "");
-                new SettingsRepository().save(defaults);
-                mainController.updateSettings(defaults);
+                outputDirField.setText(Objects.nonNull(defaults.outputDirectory()) ? defaults.outputDirectory() : "");
+                presetsDirField.setText(Objects.nonNull(defaults.presetsDirectory()) ? defaults.presetsDirectory() : "");
+                mainController.saveSettings(defaults);
                 ToastNotification.showSuccess(maxSizeSpinner, "Reset to defaults \u2713");
             }
         });
@@ -79,7 +96,7 @@ public class SettingsController {
         DirectoryChooser chooser = new DirectoryChooser();
         chooser.setTitle("Select Output Directory");
         File selected = chooser.showDialog(outputDirField.getScene().getWindow());
-        if (selected != null) outputDirField.setText(selected.getAbsolutePath());
+        if (Objects.nonNull(selected)) outputDirField.setText(selected.getAbsolutePath());
     }
 
     @FXML
@@ -87,11 +104,12 @@ public class SettingsController {
         DirectoryChooser chooser = new DirectoryChooser();
         chooser.setTitle("Select Presets Directory");
         File selected = chooser.showDialog(presetsDirField.getScene().getWindow());
-        if (selected != null) presetsDirField.setText(selected.getAbsolutePath());
+        if (Objects.nonNull(selected)) presetsDirField.setText(selected.getAbsolutePath());
     }
 
     @FXML
     private void onBack() {
+        ThemeManager.apply(darkModeToggle.getScene(), mainController.getSettings().darkMode());
         mainController.navigateTo(mainController.getCurrentStep());
     }
 }

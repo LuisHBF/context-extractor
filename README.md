@@ -11,7 +11,7 @@
 
 Context Extractor is a desktop application for developers who work with large AI models such as Google Gemini. Modern AI models accept files directly as context, but assembling a useful context file manually — gathering source code, database schemas, sample data, and project notes — is tedious and error-prone.
 
-Context Extractor automates this through a guided 5-step workflow. You select an agent prompt file, scan a project directory, optionally connect to a PostgreSQL database to extract schema definitions and sample rows, add free-form notes, and generate a structured XML file optimised for AI consumption. The XML uses `<![CDATA[` blocks throughout so the model never confuses your code with document structure.
+Context Extractor automates this through a guided 5-step workflow. You select an agent prompt file, add file sources, optionally connect to a PostgreSQL database to extract schema definitions and sample rows, add free-form notes, and generate a structured XML file optimised for AI consumption. The XML uses `<![CDATA[` blocks throughout so the model never confuses your code with document structure.
 
 When output exceeds the configured size limit the application automatically splits it into numbered part files (`context-part1.xml`, `context-part2.xml`, …), each independently valid, so you can upload them in sequence to stay within model input limits.
 
@@ -21,13 +21,19 @@ _(screenshots coming soon)_
 
 ## Features
 
-- **Guided 5-step workflow** — Agent → Directory → Database → Additional Context → Review & Generate
-- **Recursive file scanning** with a fully configurable exclusion list (names, extensions, directory names)
+- **Guided 5-step workflow** — Agent → Files → Database → Additional Context → Review & Generate
+- **Multiple file sources** — add any combination of scanned directories, individual files, and git diffs in a single session
+- **Git Changes support** — attach a `git diff` (all changes, staged only, unstaged only, or vs base branch) as a dedicated `<codeChanges>` section with annotated line-by-line diffs for AI code review workflows
+- **Drag-and-drop** — drag files and folders from Windows Explorer, IntelliJ, or VSCode directly onto the Files step
+- **Recursive directory scanning** with a fully configurable exclusion list (names, extensions, directory names)
+- **Full absolute file paths** — every `<file path="...">` in the generated XML uses the full filesystem path, preventing collisions between identically-named files in different directories
 - **PostgreSQL integration** — browse schemas and tables; select DDL and/or sample data per table with custom `WHERE` / `ORDER BY` clauses
 - **AI-readable XML output** — well-indented, generous whitespace, all dynamic content in `<![CDATA[` blocks, built-in usage instructions for the AI at the top of every file
 - **Automatic file splitting** — configurable maximum file size; oversized output is split into valid part files
-- **Preset system** — save and reload complete configurations (paths, DB credentials, table selections, settings) as JSON files
-- **Settings panel** — configure max file size, exclusion patterns, output directory, and presets directory
+- **Preset system** — save and reload complete configurations (paths, DB credentials, table selections, git diff modes, settings) as JSON files
+- **Dark mode** — toggle between light and dark themes in Settings
+- **Settings panel** — configure max file size, exclusion patterns, output directory, presets directory, and theme
+- **Unit tests** — JUnit 5 + Mockito test suite covering the exporter, file scanner, use cases, git diff runner, and persistence layer
 
 ---
 
@@ -44,7 +50,7 @@ A pre-built fat JAR is available in the [`dist/`](dist/) folder of this reposito
 It requires **Java 21** to run:
 
 ```bash
-java -jar dist/context-extractor.jar
+java -jar dist/context-extractor-1.2.0.jar
 ```
 
 
@@ -61,15 +67,6 @@ mvn javafx:run
 ```bash
 mvn package
 java -jar target/context-extractor.jar
-```
-
-### Build a Windows app-image
-
-Requires JDK 21+ with `jpackage` on `PATH`.
-
-```bash
-mvn package -Pdist
-# Output: target/dist/Context Extractor/
 ```
 
 ---
@@ -91,15 +88,38 @@ The Agent step lets you attach a **system prompt** or **behavioral instructions*
 
 ---
 
-### Step 2 — Directory
+### Step 2 — Files
 
-The Directory step scans a folder on your filesystem and collects the text content of every file inside it (recursively), respecting the exclusion list configured in Settings.
+The Files step lets you build a collection of sources. You can mix directories, individual files, and git diffs in any combination. Each source appears as a card in the list and can be removed independently.
 
-1. Click **Browse…** to select a directory (typically a Java package, an Angular module, or any sub-folder of your project — not the whole monorepo).
+#### Add Directory
+
+1. Click **+ Add Directory** to open a folder picker.
 2. The scanner runs in the background. A progress indicator appears while scanning.
-3. Once complete, the number of files found is shown. Click the file count label to expand and see the full list.
+3. Once complete, the file count badge updates. Click the badge to expand and see the full list.
 4. Use the checkboxes next to individual files to include or exclude them from the output.
-5. Click **Next →** to continue.
+
+#### Add Files
+
+1. Click **+ Add Files** to open a multi-select file picker.
+2. The selected files are added as an individual-file source.
+
+#### Add Git Changes
+
+1. Click **+ Add Git Changes** to open a folder picker.
+2. Select the root directory of a git repository. If the folder is not a git repository, an error toast appears.
+3. A card appears with a **mode selector** and a **↻ refresh** button. Four modes are available:
+   - **All Changes** — `git diff HEAD` (everything not yet committed)
+   - **Staged Only** — `git diff --cached`
+   - **Unstaged Only** — `git diff`
+   - **vs Base Branch** — `git diff <base>...HEAD` (all commits on the current branch vs its detected base)
+4. The diff runs in the background. A spinner appears while fetching; on completion the badge shows the line count.
+5. Change the mode dropdown at any time to re-fetch the diff automatically.
+6. The diff is emitted as a dedicated `<codeChanges>` section in the output XML — separate from `<files>` — so the AI can clearly distinguish static snapshots from what changed.
+
+#### Drag and drop
+
+Drag files and folders from your file explorer and drop them anywhere on the Files step. Directories are scanned recursively; individual files are added as a single-file source.
 
 > **Tip:** Configure which files are excluded in **Settings → File Exclusions**. By default, `node_modules`, `.git`, `target`, binary files (`.jar`, `.exe`, `.png`, …), and lock files are excluded.
 
@@ -155,7 +175,7 @@ The Review step gives you a read-only summary of every selection made in the pre
 
 Five summary cards display:
 - **Agent** — path to the selected agent file
-- **Directory** — root path and number of files selected
+- **Files** — number of sources and total files (plus git diff count if any)
 - **Database** — host/port/database, schema, and list of selected tables
 - **Additional Context** — first 200 characters of your notes
 - **Output** — configured max file size and output directory
@@ -175,7 +195,7 @@ Before generating, you can optionally enter a custom filename in the **Output Fi
 
 Click **Save Preset** to save your current configuration as a named JSON file. Enter a preset name and click **Save**. Presets are stored in the configured presets directory (see Settings) and appear in the **Load preset…** dropdown in the header.
 
-Loading a preset from the dropdown auto-fills all steps with the saved values and re-scans the directory in the background.
+Loading a preset from the dropdown auto-fills all steps with the saved values and re-scans directories and git diffs in the background.
 
 ---
 
@@ -198,7 +218,7 @@ Click **Reset to Defaults** to restore all settings to their original values.
 
 ## Output Format
 
-The generated XML has a human-readable comment block at the top that explains the file structure to the AI. The rest of the document follows this shape:
+The generated XML has a human-readable comment block at the top that explains the file structure to the AI. The comment conditionally includes a `<codeChanges>` explanation only when a git diff source was added. The rest of the document follows this shape:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -206,7 +226,7 @@ The generated XML has a human-readable comment block at the top that explains th
     Generated by Context Extractor ...
     HOW TO READ THIS FILE — explains each tag to the AI
 -->
-<context generated-at="2026-06-06T14:32:00" preset="my-preset" generator="context-extractor/1.0.0">
+<context generated-at="2026-06-06T14:32:00" preset="my-preset" generator="context-extractor/1.2.0">
 
     <agent>
         <![CDATA[ ... system prompt content ... ]]>
@@ -217,6 +237,14 @@ The generated XML has a human-readable comment block at the top that explains th
             <![CDATA[ ... file content ... ]]>
         </file>
     </files>
+
+    <!-- present only when a git diff source was added -->
+    <codeChanges repository="/path/to/repo" mode="ALL_CHANGES">
+        <![CDATA[
+diff --git a/src/Main.java b/src/Main.java
+...
+        ]]>
+    </codeChanges>
 
     <database schema="public">
         <table name="users">
@@ -248,6 +276,7 @@ com.contextextractor
 │
 ├── presentation/
 │   ├── MainController.java           ← Root layout, stepper navigation, preset loading
+│   ├── ThemeManager.java             ← Light/dark theme switching
 │   ├── components/
 │   │   ├── StepperSidebar.java       ← Visual stepper sidebar component
 │   │   ├── TagListEditor.java        ← Reusable chip/tag editor
@@ -269,12 +298,15 @@ com.contextextractor
 │
 ├── domain/
 │   ├── model/                        ← Immutable Java records
+│   │   ├── GitDiffMode.java          ← Enum: ALL_CHANGES, STAGED, UNSTAGED, BRANCH_BASE
+│   │   └── ...
 │   └── strategy/                     ← Strategy interfaces (ContextExportStrategy, DatabaseInspectorStrategy)
 │
 └── infrastructure/
     ├── export/XmlContextExporter.java
     ├── database/PostgresInspector.java
     ├── filesystem/RecursiveFileScanner.java
+    ├── git/GitDiffRunner.java         ← Runs git diff via ProcessBuilder
     └── persistence/
         ├── PresetRepository.java
         └── SettingsRepository.java
@@ -293,7 +325,6 @@ com.contextextractor
 - MySQL / MariaDB support
 - Markdown and JSON export formats
 - OpenAI / Claude-specific export optimisation
-- Drag-and-drop file inclusion
 - Cloud storage preset sync
 
 ## License

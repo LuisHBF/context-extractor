@@ -13,5 +13,5 @@ public record Preset(
         AppSettings settings,
         String outputFileName
 ) {
-    public record PresetSource(String type, String path) {}
+    public record PresetSource(String type, String path, String mode) {}
 }

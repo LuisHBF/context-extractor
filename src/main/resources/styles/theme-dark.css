@@ -1,0 +1,112 @@
+/* ── Dark mode token overrides ───────────────────────────────────────────── */
+
+.root {
+    -color-bg-default:     #0F1117;
+    -color-bg-overlay:     #1A1D2E;
+    -color-border-default: #2D3148;
+    -color-fg-default:     #E2E8F0;
+    -color-fg-muted:       #94A3B8;
+    -color-accent-fg:      #818CF8;
+    -accent-color:         #818CF8;
+}
+
+/* ── Header ────────────────────────────────────────────────────────────────── */
+
+.settings-button:hover {
+    -fx-background-color: #1E2240;
+}
+
+/* ── Sidebar ───────────────────────────────────────────────────────────────── */
+
+.step-label-active {
+    -fx-text-fill: #E2E8F0;
+}
+
+/* ── Step content ──────────────────────────────────────────────────────────── */
+
+.back-button:hover {
+    -fx-background-color: #1A1D2E;
+}
+
+.browse-button {
+    -fx-background-color: #1E2240;
+    -fx-text-fill: #818CF8;
+}
+
+.browse-button:hover {
+    -fx-background-color: #252A50;
+}
+
+.preview-area {
+    -fx-control-inner-background: #0F1117;
+    -fx-text-fill: #E2E8F0;
+}
+
+/* ── Database step ─────────────────────────────────────────────────────────── */
+
+.db-table-header:hover {
+    -fx-background-color: #0F1117;
+}
+
+/* ── Agent drop zone ───────────────────────────────────────────────────────── */
+
+.agent-drop-zone-active {
+    -fx-border-color: #818CF8;
+    -fx-background-color: #1E2240;
+}
+
+/* ── Secondary / outlined button ───────────────────────────────────────────── */
+
+.secondary-button {
+    -fx-text-fill: #818CF8;
+    -fx-border-color: #818CF8;
+}
+
+.secondary-button:hover {
+    -fx-background-color: #1E2240;
+}
+
+/* ── Tag / chip ────────────────────────────────────────────────────────────── */
+
+.tag-chip {
+    -fx-background-color: #1E2240;
+}
+
+.tag-chip-label {
+    -fx-text-fill: #818CF8;
+}
+
+.tag-chip-remove {
+    -fx-text-fill: #818CF8;
+}
+
+/* ── Optional step badge ───────────────────────────────────────────────────── */
+
+.step-optional-badge {
+    -fx-background-color: #1E2240;
+    -fx-text-fill: #94A3B8;
+}
+
+/* ── Progress bar ──────────────────────────────────────────────────────────── */
+
+.progress-bar .bar {
+    -fx-background-color: #818CF8;
+}
+
+.progress-bar .track {
+    -fx-background-color: #1E2240;
+}
+
+.scanning-indicator {
+    -fx-progress-color: #818CF8;
+}
+
+/* ── Result panels ─────────────────────────────────────────────────────────── */
+
+.result-panel-success {
+    -fx-background-color: #052E16;
+}
+
+.result-panel-error {
+    -fx-background-color: #2D0A0A;
+}

@@ -24,13 +24,19 @@
                            styleClass="step-description" wrapText="true"/>
                 </VBox>
 
-                <HBox spacing="10" alignment="CENTER_LEFT">
-                    <TextField fx:id="filePathField"
-                               promptText="No file selected"
-                               editable="false"
-                               HBox.hgrow="ALWAYS"/>
-                    <Button text="Browse…" styleClass="browse-button" onAction="#onBrowse"/>
-                </HBox>
+                <VBox fx:id="dropZone" spacing="10" styleClass="agent-drop-zone"
+                      onDragOver="#onDragOver" onDragDropped="#onDragDropped"
+                      onDragEntered="#onDragEntered" onDragExited="#onDragExited">
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <TextField fx:id="filePathField"
+                                   promptText="No file selected"
+                                   editable="false"
+                                   HBox.hgrow="ALWAYS"/>
+                        <Button text="Browse…" styleClass="browse-button" onAction="#onBrowse"/>
+                    </HBox>
+                    <Label text="or drag &amp; drop a .md or .agent file here"
+                           styleClass="drop-hint-label" maxWidth="Infinity" alignment="CENTER"/>
+                </VBox>
 
                 <VBox spacing="8">
                     <Label text="Preview" styleClass="step-label-text"/>

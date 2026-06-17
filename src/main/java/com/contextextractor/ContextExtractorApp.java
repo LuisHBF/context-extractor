@@ -1,6 +1,11 @@
 package com.contextextractor;
 
+import atlantafx.base.theme.PrimerDark;
 import atlantafx.base.theme.PrimerLight;
+import com.contextextractor.domain.model.AppSettings;
+import com.contextextractor.infrastructure.persistence.SettingsRepository;
+import com.contextextractor.presentation.MainController;
+import com.contextextractor.presentation.ThemeManager;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -11,11 +16,18 @@ public class ContextExtractorApp extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        Application.setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
+        AppSettings settings = new SettingsRepository().load();
+        Application.setUserAgentStylesheet(
+                settings.darkMode()
+                        ? new PrimerDark().getUserAgentStylesheet()
+                        : new PrimerLight().getUserAgentStylesheet());
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/main.fxml"));
         Scene scene = new Scene(loader.load(), 1280, 800);
-        scene.getStylesheets().add(getClass().getResource("/styles/theme.css").toExternalForm());
+        ThemeManager.apply(scene, settings.darkMode());
+
+        MainController controller = loader.getController();
+        controller.setScene(scene);
 
         stage.setTitle("Context Extractor");
         stage.setMinWidth(1100);

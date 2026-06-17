@@ -12,15 +12,23 @@ public record FileSourceConfig(List<FileSource> sources) {
         Set<String> seen = new LinkedHashSet<>();
         List<ScannedFile> result = new ArrayList<>();
         for (FileSource source : sources) {
+            if (source.type() == FileSourceType.GIT_DIFF) continue;
             for (ScannedFile file : source.includedFiles()) {
                 Path abs = source.type() == FileSourceType.DIRECTORY
                         ? source.path().resolve(file.relativePath()).normalize()
                         : source.path();
-                if (!source.excludedPaths().contains(abs) && seen.add(abs.toString())) {
-                    result.add(file);
+                String absPath = abs.toAbsolutePath().normalize().toString().replace('\\', '/');
+                if (!source.excludedPaths().contains(abs) && seen.add(absPath)) {
+                    result.add(new ScannedFile(absPath, file.content()));
                 }
             }
         }
         return List.copyOf(result);
+    }
+
+    public List<FileSource> gitDiffSources() {
+        return sources.stream()
+                .filter(s -> s.type() == FileSourceType.GIT_DIFF)
+                .toList();
     }
 }

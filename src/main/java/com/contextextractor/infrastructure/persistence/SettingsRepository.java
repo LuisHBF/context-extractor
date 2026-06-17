@@ -5,7 +5,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
 
+/**
+ * Persists and loads {@link AppSettings} as a JSON file under the application data directory.
+ * Missing or corrupted files fall back to {@link AppSettings#defaults()}.
+ */
 public class SettingsRepository {
 
     private static final String APP_DATA_DIR =
@@ -30,9 +35,9 @@ public class SettingsRepository {
 
     private AppSettings ensureDefaults(AppSettings s) {
         AppSettings d = AppSettings.defaults();
-        String out = (s.outputDirectory() != null && !s.outputDirectory().isBlank()) ? s.outputDirectory() : d.outputDirectory();
-        String presets = (s.presetsDirectory() != null && !s.presetsDirectory().isBlank()) ? s.presetsDirectory() : d.presetsDirectory();
-        return new AppSettings(s.maxXmlSizeMb(), s.excludedPatterns(), out, presets);
+        String out = (Objects.nonNull(s.outputDirectory()) && !s.outputDirectory().isBlank()) ? s.outputDirectory() : d.outputDirectory();
+        String presets = (Objects.nonNull(s.presetsDirectory()) && !s.presetsDirectory().isBlank()) ? s.presetsDirectory() : d.presetsDirectory();
+        return new AppSettings(s.maxXmlSizeMb(), s.excludedPatterns(), out, presets, s.darkMode());
     }
 
     public void save(AppSettings settings) {

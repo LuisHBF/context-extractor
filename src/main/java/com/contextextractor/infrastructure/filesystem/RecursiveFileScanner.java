@@ -12,14 +12,19 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
+/**
+ * Walks a directory tree collecting the text content of every non-excluded, non-binary file.
+ * Exclusion patterns are sourced from the user's {@link AppSettings}.
+ */
 public class RecursiveFileScanner {
 
     private final AppSettings settings;
     private int lastSkippedCount;
 
     public RecursiveFileScanner(AppSettings settings) {
-        this.settings = settings;
+        this.settings = Objects.requireNonNull(settings, "settings must not be null");
     }
 
     public List<ScannedFile> scan(Path rootDirectory) {
@@ -75,15 +80,20 @@ public class RecursiveFileScanner {
         return lastSkippedCount;
     }
 
+    /** Scans a single file, returning an empty list if the file is excluded or unreadable. */
     public List<ScannedFile> scanSingle(Path file) {
         if (isExcluded(file.getFileName().toString())) return List.of();
         try {
             String content = Files.readString(file, StandardCharsets.UTF_8);
             if (content.indexOf('\0') >= 0) return List.of();
-            return List.of(new ScannedFile(file.getFileName().toString(), content));
+            return List.of(new ScannedFile(buildSingleFilePath(file), content));
         } catch (IOException e) {
             return List.of();
         }
+    }
+
+    private String buildSingleFilePath(Path file) {
+        return file.toAbsolutePath().normalize().toString().replace('\\', '/');
     }
 
     private boolean isExcluded(String name) {
